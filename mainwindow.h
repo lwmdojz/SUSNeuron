@@ -26,6 +26,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    Ui::MainWindow *ui;
 
 private slots:
     void on_pushButton_SamplingPeriod_clicked();
@@ -60,7 +61,6 @@ private slots:
     void on_pushButton_zcount_clicked();
 
 private:
-    Ui::MainWindow *ui;
     QUdpSocket  *mrecv;
     QUdpSocket  *msend;
     udpSave *udp;

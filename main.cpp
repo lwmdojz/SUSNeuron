@@ -8,7 +8,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QMainWindow window;
+    QMainWindow PlotWindow;
+    MainWindow ControlWindow;
 
     Plot *plot = new Plot;
     plot->setTitle("Dynamic Volt display");
@@ -18,8 +19,9 @@ int main(int argc, char *argv[])
     QChartView chartView(plot);
     chartView.setRenderHint(QPainter::Antialiasing);
 
-    window.setCentralWidget(&chartView);
-    window.resize(800,600);
-    window.show();
+    PlotWindow.setCentralWidget(&chartView);
+    PlotWindow.resize(800,600);
+    PlotWindow.show();
+    ControlWindow.show();
     return a.exec();
 }

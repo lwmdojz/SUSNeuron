@@ -87,13 +87,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboBox->addItem(QString("1pF"));
     ui->comboBox->addItem(QString("10pF"));
     ui->comboBox->setCurrentIndex(2);
-//    ui->comboBox_hz->addItem(QString("0.1Hz"));
-//    ui->comboBox_hz->addItem(QString("1Hz"));
-//    ui->comboBox_hz->addItem(QString("10Hz"));
-//    ui->comboBox_hz->addItem(QString("100Hz"));
-//    ui->comboBox_hz->addItem(QString("1kHz"));
-//    ui->comboBox_hz->addItem(QString("10kHz"));
-//    ui->comboBox_hz->setCurrentIndex(4);
 }
 
 MainWindow::~MainWindow()

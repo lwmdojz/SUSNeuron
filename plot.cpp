@@ -1,4 +1,4 @@
-/** Dynamic plot partd
+/** Dynamic plot part
  *  Reference: QtCharts example: dynamic spline
  *  Version 1.0: copy
  *
@@ -54,7 +54,7 @@ Plot::~Plot()
 void Plot::handleTimeout()
 {
     qreal x = plotArea().width() / (m_axisX->max() - m_axisX->min());
-    qreal y = (m_axisX->max() - m_axisX->min()) / (m_axisX->tickCount()-1);
+//    qreal y = (m_axisX->max() - m_axisX->min()) / (m_axisX->tickCount()-1);
     m_x += 1;
     m_y = 3*sin(m_x/(2*M_PI*1));
     m_series->append(m_x, m_y);     // append a point (m_x, m_y);
