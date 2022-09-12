@@ -22,21 +22,19 @@ public:
 
 public slots:
     void handleTimeout();
-    void setDataPoint(quint32 data);
-    //    void setTimeRange();
-    //    void setVoltRange();
+    void loadData(quint16 channel, quint16 data);
+    void setTimeRange(quint16 range_ms);
+    void setVoltRange(quint16 range_uv, qint16 center_uv);
 
 private:
     QTimer plot_timer;
     QLineSeries *plot_series;
-    QStringList plot_titles;
+
     QValueAxis *plot_axisX;
     QValueAxis *plot_axisY;
-    qreal plot_step;
-    qreal plot_x[2048];
-    qreal plot_y[2048];
 
-    quint32 queueHead;
+    quint32 plot_time;
+    qreal plot_volt[32][65535];
 };
 
 #endif // PLOT_H

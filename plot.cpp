@@ -16,9 +16,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags):
     plot_series(0),
     plot_axisX(new QValueAxis()),
     plot_axisY(new QValueAxis()),
-    plot_step(0),
-    plot_x(80),    // initiate point position
-    plot_y(0)
+    plot_time(0)       // initiate point position
 {
     // Init timer
     QObject::connect(&plot_timer, &QTimer::timeout, this, &Plot::handleTimeout);
@@ -29,7 +27,6 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags):
 
     plot_series = new QLineSeries(this);
     plot_series->setPen(green);
-    plot_series->append(plot_x, plot_y); // plot the init pos
 
     addSeries(plot_series);
 
@@ -54,10 +51,22 @@ Plot::~Plot()
 void Plot::handleTimeout()
 {
     qreal x = plotArea().width() / (plot_axisX->max() - plot_axisX->min());
-    plot_x += 1;
-    plot_y = 3*sin(plot_x/(2*PI*1));
-    plot_series->append(plot_x, plot_y);     // append a point (plot_x, plot_y);
+    plot_time += 1;
+//    plot_series->append(plot_time, plot_volt);     // append a point (plot_time, plot_volt);
     scroll(x, 0);                   // coordinate move with vector (x,0)
 }
 
+void Plot::loadData(quint16 channel, quint16 data)
+{
+    plot_volt[channel-1][plot_time%60000] = data;
+}
 
+void Plot::setTimeRange(quint16 range_ms)
+{
+    plot_axisX->setRange(plot_time-range_ms, plot_time);
+}
+
+void Plot::setVoltRange(quint16 range_uv, qint16 center_uv)
+{
+    plot_axisY->setRange(center_uv-range_uv/2, center_uv+range_uv/2);
+}

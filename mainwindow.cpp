@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
                     QTextStream out(&file);
                     for(int i=0;i<len/2;i++){
                         out<<((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]<<"\n"; // data I want
+                        
                         qDebug()<<(quint8)buf[2*i+1]<<(quint8)buf[2*i];
                     }
                     file.close();
@@ -84,11 +85,10 @@ MainWindow::MainWindow(QWidget *parent)
     });
     
     udp = new udpSave();
-    ui->comboBox->clear();
-    ui->comboBox->addItem(QString("0.1pF"));
-    ui->comboBox->addItem(QString("1pF"));
-    ui->comboBox->addItem(QString("10pF"));
+
     ui->comboBox->setCurrentIndex(2);
+    ui->comboBox_UpperCutoff->setCurrentIndex(3);
+    ui->comboBox_LowerCutoff->setCurrentIndex(24);
 }
 
 MainWindow::~MainWindow()
@@ -126,7 +126,7 @@ void MainWindow::on_pushButton_DSPOnoff_clicked()
 
 void MainWindow::on_pushButton_Bandwidth_clicked()
 {
-    QString str = "f" + QString::number(ui->spinBox_UpperBandwidth->value(), 10) + " " + QString::number(ui->spinBox_LowerBandwidth->value(), 10);
+    QString str = "f" + QString::number(ui->comboBox_UpperCutoff->currentIndex()) + " " + QString::number(ui->comboBox_LowerCutoff->currentIndex());
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
