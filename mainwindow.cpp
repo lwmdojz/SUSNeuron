@@ -1,5 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "plot.h"
+
+#include <QtCharts/QChartView>
+#include <QtWidgets/QApplication>
 #include <QFileDialog>
 #include <QSettings>
 
@@ -18,8 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     else
     {
         QSettings *configIniWrite = new QSettings("config.ini", QSettings::IniFormat);
-        configIniWrite->setValue("ip", "192.168.1.2");
-        ip = "192.168.1.2";
+        configIniWrite->setValue("ip", "192.168.137.24");
+        ip = "192.168.137.24";
     }
 
     mrecv = new QUdpSocket;
@@ -74,11 +78,11 @@ MainWindow::MainWindow(QWidget *parent)
                     QTextStream out(&file);
                     for(int i=0;i<len/2;i++){
                         out<<((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]<<"\n"; // data I want
-                        
+                        plot->loadData(i%32, ((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]);
                         qDebug()<<(quint8)buf[2*i+1]<<(quint8)buf[2*i];
                     }
                     file.close();
-
+                    plot->nextPt();
                 }
             }
         } 
@@ -89,6 +93,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboBox->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
+    plot = new Plot;
 }
 
 MainWindow::~MainWindow()
@@ -98,20 +103,26 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_SamplingPeriod_clicked()
-{
-    QString MyData = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
-    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
-}
+//void MainWindow::on_pushButton_SamplingPeriod_clicked()
+//{
+//    QString MyData = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
+//    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
+//}
 
-void MainWindow::on_pushButton_DSPCutoff_clicked()
-{
-    QString MyData = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
-    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
-}
+//void MainWindow::on_pushButton_DSPCutoff_clicked()
+//{
+//    QString MyData = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
+//    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
+//}
 
 void MainWindow::on_pushButton_DSPOnoff_clicked()
 {
+    QString MyData = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
+    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
+
+    MyData = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
+    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
+
     QString str = "d";
     if (ui->checkBox_DSPOnoff->checkState() == Qt::Checked)
     {
@@ -139,7 +150,7 @@ void MainWindow::on_pushButton_read_clicked()
 
 void MainWindow::on_pushButton_run_clicked()
 {
-    if (ui->pushButton_run->text() == "运行")
+    if (ui->pushButton_run->text() == "Press to run")
     {
         QString str = "s";
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
@@ -148,13 +159,15 @@ void MainWindow::on_pushButton_run_clicked()
             udp->term = false;
             udp->start();
         }
-        ui->pushButton_run->setText("暂停");
+        ui->pushButton_run->setText("Running, press to stop");
+        
+        PlotWindow.show();
     }
     else
     {
         QString str = "p";
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-        ui->pushButton_run->setText("运行");
+        ui->pushButton_run->setText("Press to run");
         if (udp->isRunning())
             udp->stop();
     }

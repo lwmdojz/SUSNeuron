@@ -8,20 +8,18 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QMainWindow PlotWindow;
     MainWindow ControlWindow;
 
-    Plot *plot = new Plot;
-    plot->setTitle("Dynamic Volt display");
-    plot->legend()->hide();
-    plot->setAnimationOptions(QChart::NoAnimation);
+    ControlWindow.plot = new Plot;
+    ControlWindow.plot->setTitle("Dynamic Volt display");
+    ControlWindow.plot->legend()->hide();
+    ControlWindow.plot->setAnimationOptions(QChart::NoAnimation);
 
-    QChartView chartView(plot);
+    QChartView chartView(ControlWindow.plot);
     chartView.setRenderHint(QPainter::Antialiasing);
 
-    PlotWindow.setCentralWidget(&chartView);
-    PlotWindow.resize(800,600);
-    PlotWindow.show();
+    ControlWindow.PlotWindow.setCentralWidget(&chartView);
+    ControlWindow.PlotWindow.resize(800,600);
     ControlWindow.show();
     return a.exec();
 }

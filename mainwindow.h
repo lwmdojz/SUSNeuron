@@ -27,11 +27,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     Ui::MainWindow *ui;
+    QMainWindow PlotWindow;
+    Plot *plot;
 
 private slots:
-    void on_pushButton_SamplingPeriod_clicked();
+//    void on_pushButton_SamplingPeriod_clicked();
 
-    void on_pushButton_DSPCutoff_clicked();
+//    void on_pushButton_DSPCutoff_clicked();
 
     void on_pushButton_DSPOnoff_clicked();
 
@@ -69,5 +71,7 @@ private:
     UdpRecvType recvTpye;
     QTimer *plotting_timer;
     QString fileName="";
+
+
 };
 #endif // MAINWINDOW_H

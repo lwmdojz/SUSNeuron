@@ -16,11 +16,11 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags):
     plot_series(0),
     plot_axisX(new QValueAxis()),
     plot_axisY(new QValueAxis()),
-    plot_time(0)       // initiate point position
+    plot_time(80)       // initiate point position
 {
     // Init timer
     QObject::connect(&plot_timer, &QTimer::timeout, this, &Plot::handleTimeout);
-    plot_timer.setInterval(20);   // 20 frame per second
+    plot_timer.setInterval(20);   // 50 frame per second
 
     QPen green(Qt::red);
     green.setWidth(0);
@@ -35,7 +35,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags):
     plot_series->attachAxis(plot_axisX);
     plot_series->attachAxis(plot_axisY);
 
-    plot_axisX->setTickCount(21);
+    plot_axisX->setTickCount(8);
     plot_axisY->setTickCount(6);
     plot_axisX->setRange(0, 100);
     plot_axisY->setRange(-10, 10);
@@ -50,15 +50,25 @@ Plot::~Plot()
 
 void Plot::handleTimeout()
 {
-    qreal x = plotArea().width() / (plot_axisX->max() - plot_axisX->min());
-    plot_time += 1;
-//    plot_series->append(plot_time, plot_volt);     // append a point (plot_time, plot_volt);
-    scroll(x, 0);                   // coordinate move with vector (x,0)
+//    qreal x = plotArea().width() / (plot_axisX->max() - plot_axisX->min());
+    plot_series->append(sample_time/plot_timer.interval(), plot_volt[plot_channel][plot_time]);
+    scroll(sample_time*plot_timer.interval(), 0);                   // coordinate move with vector (x,0)
+    sample_time++;
 }
 
 void Plot::loadData(quint16 channel, quint16 data)
 {
-    plot_volt[channel-1][plot_time%60000] = data;
+    plot_volt[channel][plot_time%60000] = data;
+}
+
+void Plot::setChannel(quint16 channel)
+{
+    plot_channel = channel;
+}
+
+void Plot::nextPt()
+{
+    plot_time++;
 }
 
 void Plot::setTimeRange(quint16 range_ms)
