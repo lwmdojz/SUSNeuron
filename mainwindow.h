@@ -27,7 +27,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     Ui::MainWindow *ui;
-    QMainWindow PlotWindow;
     Plot *plot;
 
 private slots:

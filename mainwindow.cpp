@@ -36,8 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(msend, &QUdpSocket::readyRead, this, [=]()
     {
         char buf[1024] = {0};
-        QHostAddress cli_addr;  //对方地址
-        quint16 port;  //对方端口
+        QHostAddress cli_addr;      // client address
+        quint16 port;               // client port
         qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
         if (len > 0) {
             QString str = QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
@@ -56,30 +56,50 @@ MainWindow::MainWindow(QWidget *parent)
             }
             recvTpye=UdpOther;
 
-            ui->statusbar->showMessage(tr("应答完成!"),2000);
+            ui->statusbar->showMessage(tr("Responsed!"),2000);
         } 
     });
 
     connect(mrecv, &QUdpSocket::readyRead, this, [=]()
     {
-        //读取对方发送的数据
+        // Keep receiving data
         char buf[2048] = {0};
-        QHostAddress cli_addr;  //对方地址
-        quint16 port;  //对方端口
+        QHostAddress cli_addr;      // client address
+        quint16 port;               // client port
         qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
-        qDebug()<<"阻抗测试"<<len;
+
+        qDebug()<<"Impedance test"<<len;
         if (len >0) {
             if(fileName!=""){
-                QFile file(fileName);
+                QFile file(fileName+".csv");
+
+
+
                 if (!(file.open(QFile::WriteOnly | QIODevice::Append)))//QIODevice::Append
                 {
                     file.close();
                 } else{
                     QTextStream out(&file);
-                    for(int i=0;i<len/2;i++){
-                        out<<((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]<<"\n"; // data I want
-                        plot->loadData(i%32, ((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]);
-                        qDebug()<<(quint8)buf[2*i+1]<<(quint8)buf[2*i];
+
+                    for(int i=0;i<32;i++)
+                    {
+                        out<<tr("ch")<<i<<",";
+                    }
+
+                    auto toUtf16 = QStringDecoder(QStringDecoder::Utf8);
+
+                    quint16 data = (((quint16)buf[1])<<8)+(quint16)buf[0];
+                    QString str = toUtf16(data);
+
+                    out << str << ","; // data I want ?
+                    plot->loadData(0, (((quint16)buf[1])<<8)+(quint16)buf[0]);
+                    qDebug()<<(((quint16)buf[1])<<8)+(quint16)buf[0];
+                    for(int i=1;i<len/2;i++){
+                        out << buf[2*i+1] << buf[2*i] << ",";
+                        if(i%32 == 0) {
+                            out << "\n";
+                        }
+                        plot->loadData(i%32, (((quint16)buf[1])<<8)+(quint16)buf[0]);
                     }
                     file.close();
                     plot->nextPt();
@@ -93,7 +113,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboBox->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
+
     plot = new Plot;
+    plot->setTitle("Dynamic Volt display");
+    plot->legend()->hide();
+    plot->setAnimationOptions(QChart::NoAnimation);
+//    plot->setBackgroundVisible(false);
+    plot->setContentsMargins(0, 0, 0, 0);
+    plot->setMargins(QMargins(0, 0, 0, 0));
+    plot->setBackgroundRoundness(0);
+
+    ui->graphicsView->setChart(plot);
 }
 
 MainWindow::~MainWindow()
@@ -103,17 +133,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//void MainWindow::on_pushButton_SamplingPeriod_clicked()
-//{
-//    QString MyData = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
-//    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
-//}
 
-//void MainWindow::on_pushButton_DSPCutoff_clicked()
-//{
-//    QString MyData = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
-//    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
-//}
 
 void MainWindow::on_pushButton_DSPOnoff_clicked()
 {
@@ -161,7 +181,7 @@ void MainWindow::on_pushButton_run_clicked()
         }
         ui->pushButton_run->setText("Running, press to stop");
         
-        PlotWindow.show();
+        plot->startPlot();
     }
     else
     {
@@ -170,12 +190,14 @@ void MainWindow::on_pushButton_run_clicked()
         ui->pushButton_run->setText("Press to run");
         if (udp->isRunning())
             udp->stop();
+
+        plot->pausePlot();
     }
 }
 
 void MainWindow::on_pushButton_savePath_clicked()
 {
-    udp->fileName = QFileDialog::getSaveFileName(this, tr("保存文件（如果存在删除重建）"), "", tr("(*.dat)"));
+    udp->fileName = QFileDialog::getSaveFileName(this, tr("保存文件（如果存在删除重建）"), "", tr("(*.csv)"));
     QFileInfo fileInfo(udp->fileName);
     if (fileInfo.isFile())
     {
@@ -217,7 +239,7 @@ void MainWindow::on_pushButton_currentset_clicked()
 
 void MainWindow::on_pushButton_impedancetest_clicked()
 {
-    fileName = QFileDialog::getSaveFileName(this, tr("保存文件（如果存在删除重建）"), "", tr("(*.csv)"));
+    fileName = QFileDialog::getSaveFileName(this, tr("Save file (if file existed, delete and rebuild it"), "", tr("(*.csv)"));
     QFileInfo fileInfo(fileName);
     if (fileInfo.isFile())
     {
