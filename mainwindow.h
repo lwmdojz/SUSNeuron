@@ -51,6 +51,8 @@ private slots:
 
     void on_pushButton_calibrate_clicked();
 
+    void on_pushButton_clear_clicked();
+
     void on_pushButton_channelset_clicked();
 
     void on_pushButton_currentset_clicked();

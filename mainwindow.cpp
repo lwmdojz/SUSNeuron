@@ -71,31 +71,27 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug()<<"Impedance test"<<len;
         if (len >0) {
             if(fileName!=""){
+
                 QFile file(fileName+".csv");
 
-
-
-                if (!(file.open(QFile::WriteOnly | QIODevice::Append)))//QIODevice::Append
+                if (!(file.open(QFile::WriteOnly | QIODevice::Text)))//QIODevice::Append
                 {
                     file.close();
                 } else{
                     QTextStream out(&file);
+                    out.setEncoding(QStringConverter::Utf8);
+                    out.generateByteOrderMark();
 
                     for(int i=0;i<32;i++)
                     {
                         out<<tr("ch")<<i<<",";
                     }
 
-                    auto toUtf16 = QStringDecoder(QStringDecoder::Utf8);
-
-                    quint16 data = (((quint16)buf[1])<<8)+(quint16)buf[0];
-                    QString str = toUtf16(data);
-
-                    out << str << ","; // data I want ?
+                    out << ((((quint16)buf[1])<<8)+(quint16)buf[0]) << ",";
                     plot->loadData(0, (((quint16)buf[1])<<8)+(quint16)buf[0]);
-                    qDebug()<<(((quint16)buf[1])<<8)+(quint16)buf[0];
+
                     for(int i=1;i<len/2;i++){
-                        out << buf[2*i+1] << buf[2*i] << ",";
+                        out << ((((quint16)buf[1])<<8)+(quint16)buf[0]) << ",";
                         if(i%32 == 0) {
                             out << "\n";
                         }
@@ -220,6 +216,12 @@ void MainWindow::on_pushButton_shutdown_clicked()
 }
 
 void MainWindow::on_pushButton_calibrate_clicked()
+{
+    QString str = "a";
+    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+}
+
+void MainWindow::on_pushButton_clear_clicked()
 {
     QString str = "c";
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);

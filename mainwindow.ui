@@ -185,7 +185,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_readValue">
+            <widget class="QPushButton" name="pushButton_read">
              <property name="text">
               <string>Read Value</string>
              </property>
@@ -216,7 +216,7 @@
             <widget class="QSpinBox" name="spinBox_writeData"/>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_writeValue">
+            <widget class="QPushButton" name="pushButton_write">
              <property name="text">
               <string>Write Value</string>
              </property>
