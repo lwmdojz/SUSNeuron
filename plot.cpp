@@ -32,10 +32,11 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags):
     plot_series->attachAxis(plot_axisX);
     plot_series->attachAxis(plot_axisY);
 
-    plot_axisX->setRange(0, 10000);
-    plot_axisY->setRange(0, 30000);
+    plot_axisX->setRange(0, 1000);
+    plot_axisY->setRange(-100, 100);
 
     voltagePts = plot_series->points();
+    plot_timer.start();
 }
 
 Plot::~Plot()
@@ -52,7 +53,8 @@ Plot::~Plot()
 void Plot::handleTimeout()
 {
 //    plot_series->append(sample_time/plot_timer.interval(), plot_volt[plot_channel][plot_time]);
-//    sample_time++;
+    sample_time++;
+
 }
 
 /**
@@ -63,10 +65,9 @@ void Plot::handleTimeout()
  */
 void Plot::loadData(quint16 channel, quint16 data)
 {
-//    plot_volt[channel][plot_time%60000] = data;
-    if (channel == 0) {
-        plot_series->append(plot_time, data);
-    }
+
+    plot_series->append(plot_time, data);
+
 }
 
 void Plot::nextPt()
