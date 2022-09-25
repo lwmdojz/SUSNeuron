@@ -56,13 +56,10 @@ private slots:
     void on_pushButton_zcount_clicked();
 
     // Others
-//    void handleTimeout();
     void handleSend();
     void handleReceive();
 
 private:
-
-//    QTimer plot_timer;
 
     QUdpSocket  *mrecv;
     QUdpSocket  *msend;

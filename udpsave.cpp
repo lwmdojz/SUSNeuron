@@ -48,23 +48,22 @@ void udpSave::run()
                             // odd byte to be plot => store first byte as high
                             if ( plotSize % 2 )
                             {
-                                plotData[channelPointer] = datagram[channelPointer];
-                                channelPointer = (channelPointer+1) % 64;
+                                plotData[channelPointer] = datagram[0];
                             }
                         }
 
-                        for ( int i=0; i<(datagram.size()-j)/2; i++ )
+                        for ( int i=0; i<(datagram.size()-j); i++ )
                         {
-                            plotData[channelPointer] = datagram[channelPointer];
-                            channelPointer = (channelPointer+1) % 64;
+                            plotData[channelPointer+i+j] = datagram[i];
 
                             if (!plotSize)
                             {
-                                plotData[64] = 1;
+                                plotData[64] = 1;   // flag: data translation complete
                                 break;
                             }
                         }
                     }
+                    // end of plot data processing
                 }
             }
         }
@@ -82,7 +81,6 @@ void udpSave::udpInit(quint16 port, QString FileName)
 {
     sendPort = port;
     fileName = FileName;
-//    plot = plotAddr;
 }
 
 void udpSave::setPort(quint16 port)
@@ -103,6 +101,13 @@ QString udpSave::getFilename()
 void udpSave::handleTimeout()
 {
     plotSize += 64;
+
+//     //generate signal for test ?
+//    for (int i=0; i<64; i++)
+//    {
+//        plotData[i] = plotSize;
+//        plotSize--;
+//    }
 }
 
 

@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // IP config
     QFileInfo iniFileInfo("config.ini"); // init, read .Ini file
     if (iniFileInfo.isFile())
     {
@@ -34,10 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
     mrecv->bind(sendPort + 2); // for impedance test
     recvTpye = UdpOther;
 
-    // Send data & response
     connect(msend, &QUdpSocket::readyRead, this, &MainWindow::handleSend);
 
-    // Continuely receive data
     connect(mrecv, &QUdpSocket::readyRead, this, &MainWindow::handleReceive);
 
     ui->comboBox->setCurrentIndex(2);
@@ -54,7 +53,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     udp = new udpSave();
 
-
     ui->graphicsView->setChart(plot);
 }
 
@@ -64,6 +62,70 @@ MainWindow::~MainWindow()
         udp->stop();
     delete ui;
 }
+
+// Udp handle function
+
+void MainWindow::handleSend()
+{
+    char buf[1024] = {0};
+    QHostAddress cli_addr; // client address
+    quint16 port;          // client port
+    qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+
+    if (len > 0)
+    {
+        QString str = QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
+        qDebug() << str;
+        if (recvTpye == UdpRead)
+        {
+            QString reg = "0x" + QString::number((quint8)buf[0], 16);
+            qDebug() << reg;
+            ui->label_readValue->setText(reg);
+        }
+        if (recvTpye == UdpBatt)
+        {
+            QString bat = QString::number(((quint8)buf[0]+(((quint16)buf[1])<<8)) * 2) + "mV";
+            qDebug() << bat;
+            ui->label_batt->setText(bat);
+        }
+        recvTpye = UdpOther;
+
+        ui->statusbar->showMessage(tr("Responsed!"), 1000);
+    }
+}
+
+// Read data of Impedance test
+void MainWindow::handleReceive()
+{
+    char buf[2048] = {0};
+    QHostAddress cli_addr; // Client address
+    quint16 port;          // Client port
+    qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+    qDebug() << "Impedance test" << len;
+
+    if (len > 0)
+    {
+        if (fileName != "")
+        {
+            QFile file(fileName);
+            if (!(file.open(QFile::WriteOnly | QIODevice::Append))) // QIODevice::Append
+            {
+                file.close();
+            }
+            else
+            {
+                QTextStream out(&file);
+                for (int i = 0; i < len / 2; i++)
+                {
+                    out << ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i] << "\n"; // data I want
+                    qDebug() << (quint8)buf[2 * i + 1] << (quint8)buf[2 * i];
+                }
+                file.close();
+            }
+        }
+    }
+}
+
 
 // Acquisition parameter setting
 
@@ -218,65 +280,6 @@ void MainWindow::on_pushButton_zcount_clicked()
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
-// Others
 
-void MainWindow::handleSend()
-{
-    char buf[1024] = {0};
-    QHostAddress cli_addr; // client address
-    quint16 port;          // client port
-    qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
-    if (len > 0)
-    {
-        QString str = QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
-        qDebug() << str;
-        if (recvTpye == UdpRead)
-        {
-            QString reg = "0x" + QString::number((quint8)buf[0], 16);
-            qDebug() << reg;
-            ui->label_readValue->setText(reg);
-        }
-        if (recvTpye == UdpBatt)
-        {
-            QString bat = QString::number(((quint8)buf[0]+(((quint16)buf[1])<<8)) * 2) + "mV";
-            qDebug() << bat;
-            ui->label_batt->setText(bat);
-        }
-        recvTpye = UdpOther;
 
-        ui->statusbar->showMessage(tr("Responsed!"), 1000);
-    }
-}
-
-// Read data of Impedance test
-void MainWindow::handleReceive()
-{
-    char buf[2048] = {0};
-    QHostAddress cli_addr; // Client address
-    quint16 port;          // Client port
-    qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
-    qDebug() << "Impedance test" << len;
-
-    if (len > 0)
-    {
-        if (fileName != "")
-        {
-            QFile file(fileName);
-            if (!(file.open(QFile::WriteOnly | QIODevice::Append))) // QIODevice::Append
-            {
-                file.close();
-            }
-            else
-            {
-                QTextStream out(&file);
-                for (int i = 0; i < len / 2; i++)
-                {
-                    out << ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i] << "\n"; // data I want
-                    qDebug() << (quint8)buf[2 * i + 1] << (quint8)buf[2 * i];
-                }
-                file.close();
-            }
-        }
-    }
-}

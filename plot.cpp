@@ -101,6 +101,7 @@ void Plot::handleTimeout()
             }
         }
         plotData[64] = 0;
+        plot_time++;
     }
 }
 
