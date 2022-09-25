@@ -67,11 +67,12 @@ private:
     QUdpSocket  *mrecv;
     QUdpSocket  *msend;
     udpSave *udp;
-    QString ip="192.168.137.102";
-    quint16 sendPort=2333;
+    QString ip;
+    quint16 sendPort = 2333;
+    quint16 receivePott = 2335;
     UdpRecvType recvTpye;
 
-    QString fileName="";
+    QString fileName = "";
 
 };
 #endif // MAINWINDOW_H

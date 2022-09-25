@@ -2,8 +2,8 @@
 #include "ui_mainwindow.h"
 #include "plot.h"
 
-#include <QtCharts/QChartView>
-#include <QtWidgets/QApplication>
+#include <QtCharts>
+#include <QtWidgets>
 #include <QFileDialog>
 #include <QSettings>
 #include <QtCore>
@@ -12,9 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-//    QObject::connect(&plot_timer, &QTimer::timeout, this, &MainWindow::handleTimeout);
-//    plot_timer.setInterval(20);   // 50 frame per second
 
     QFileInfo iniFileInfo("config.ini"); // init, read .Ini file
     if (iniFileInfo.isFile())
@@ -33,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     // UDP init
     mrecv = new QUdpSocket;
     msend = new QUdpSocket;
-    msend->bind(sendPort);
-    mrecv->bind(sendPort + 2);
+    msend->bind(sendPort);     // for normal commend
+    mrecv->bind(sendPort + 2); // for impedance test
     recvTpye = UdpOther;
 
     // Send data & response
@@ -42,8 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Continuely receive data
     connect(mrecv, &QUdpSocket::readyRead, this, &MainWindow::handleReceive);
-
-    udp = new udpSave();
 
     ui->comboBox->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
@@ -56,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent)
     plot->setContentsMargins(0, 0, 0, 0);
     plot->setMargins(QMargins(0, 0, 0, 0));
     plot->setBackgroundRoundness(0);
+
+    udp = new udpSave();
+
 
     ui->graphicsView->setChart(plot);
 }
@@ -135,10 +133,10 @@ void MainWindow::on_pushButton_run_clicked()
         {
             udp->term = false;
             udp->start();
+            udp->udpTimer.start();
+            plot->plotTimer.start();
         }
         ui->pushButton_run->setText("Running, press to stop");
-        
-//        plot_timer.start();
     }
     else
     {
@@ -146,21 +144,24 @@ void MainWindow::on_pushButton_run_clicked()
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
         ui->pushButton_run->setText("Press to run");
         if (udp->isRunning())
+        {
             udp->stop();
-
-//        plot_timer.stop();
+            udp->udpTimer.stop();
+            plot->plotTimer.stop();
+        }
     }
 }
 
 void MainWindow::on_pushButton_savePath_clicked()
 {
-    udp->fileName = QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.dat)"));
-    QFileInfo fileInfo(udp->fileName);
+    udp->setFilename(QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.dat)")));
+    QFileInfo fileInfo(udp->getFilename());
+
     if (fileInfo.isFile())
     {
         fileInfo.dir().remove(fileInfo.fileName());
     }
-    qDebug() << udp->fileName;
+    qDebug() << udp->getFilename();
 }
 
 void MainWindow::on_pushButton_getBatt_clicked()
@@ -219,82 +220,63 @@ void MainWindow::on_pushButton_zcount_clicked()
 
 // Others
 
-//void MainWindow::handleTimeout()
-//{
-//    plot->loadData(0, tempData);
-//    plot->nextPt();
-//}
-
 void MainWindow::handleSend()
 {
     char buf[1024] = {0};
-    QHostAddress cli_addr;      // client address
-    quint16 port;               // client port
+    QHostAddress cli_addr; // client address
+    quint16 port;          // client port
     qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
-    if (len > 0) {
+    if (len > 0)
+    {
         QString str = QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
-        qDebug()<<str;
-        if(recvTpye==UdpRead)
+        qDebug() << str;
+        if (recvTpye == UdpRead)
         {
-            quint8 reg=(quint8)buf[0];
-            qDebug()<<buf[0];
-            ui->label_readValue->setText("0x" + QString::number(reg,16));
+            QString reg = "0x" + QString::number((quint8)buf[0], 16);
+            qDebug() << reg;
+            ui->label_readValue->setText(reg);
         }
-        if(recvTpye==UdpBatt)
+        if (recvTpye == UdpBatt)
         {
-            quint16 reg=(quint8)buf[0]+(((quint16)buf[1])<<8);
-            qDebug()<<reg;
-            ui->label_batt->setText(QString::number(reg*2)+"mV");
+            QString bat = QString::number(((quint8)buf[0]+(((quint16)buf[1])<<8)) * 2) + "mV";
+            qDebug() << bat;
+            ui->label_batt->setText(bat);
         }
-        recvTpye=UdpOther;
+        recvTpye = UdpOther;
 
-        ui->statusbar->showMessage(tr("Responsed!"),2000);
+        ui->statusbar->showMessage(tr("Responsed!"), 1000);
     }
 }
 
+// Read data of Impedance test
 void MainWindow::handleReceive()
 {
     char buf[2048] = {0};
-    QHostAddress cli_addr;      // client address
-    quint16 port;               // client port
+    QHostAddress cli_addr; // Client address
+    quint16 port;          // Client port
     qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+    qDebug() << "Impedance test" << len;
 
-    if (len >0)
+    if (len > 0)
     {
-        QString str = QString("[%1:%2]").arg(cli_addr.toString()).arg(port);
-        qDebug()<<str;
-//        if(fileName!=""){
-
-//            QFile file(fileName+".dat");
-
-//            if (!(file.open(QFile::WriteOnly | QIODevice::Append))) //QIODevice::Append
-//            {
-//                file.close();
-//            }
-//            else
-//            {
-//                QTextStream out(&file);
-
-//                quint8 data = (((quint16)((quint8)buf[1])<<8)+(quint8)buf[0]);
-
-//                out << (((quint16)((quint8)buf[1])<<8)+(quint8)buf[0]) << "\n";
-//                ui->label_readValue->setText(QString::number((quint8)buf[0],10));
-
-//                for(int i=0; i<len/2; i++)
-//                {
-//                    data = (((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]);
-//                    out << data << "\n";
-//                }
-//                file.close();
-//            }
-//        }
-//        ui->statusbar->showMessage(tr("Running"),200);
+        if (fileName != "")
+        {
+            QFile file(fileName);
+            if (!(file.open(QFile::WriteOnly | QIODevice::Append))) // QIODevice::Append
+            {
+                file.close();
+            }
+            else
+            {
+                QTextStream out(&file);
+                for (int i = 0; i < len / 2; i++)
+                {
+                    out << ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i] << "\n"; // data I want
+                    qDebug() << (quint8)buf[2 * i + 1] << (quint8)buf[2 * i];
+                }
+                file.close();
+            }
+        }
     }
 }
-
-//quint16 MainWindow::get_tempData()
-//{
-//    return tempData;
-//}
-

@@ -13,6 +13,8 @@ QT_USE_NAMESPACE
 
 #define PI 3.14159265358979323846 /* pi */
 
+static quint8 plotData[65];
+
 class Plot : public QChart
 {
     Q_OBJECT
@@ -20,31 +22,28 @@ public:
     Plot(QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = {});
     virtual ~Plot();
 
+    QTimer plotTimer;
+
 public slots:
-    void handleTimeout();
 
     void loadData(quint16 channel, quint16 data);
     void nextPt();
-
-    void startPlot();
-    void pausePlot();
 
     void setChannel(quint16 channel);
     void setTimeRange(quint16 range_ms);
     void setVoltRange(quint16 range_uv, qint16 center_uv);
 
+    void handleTimeout();
+
 private:
-    QTimer plot_timer;
-    QLineSeries *plot_series;
+    QLineSeries *plot_series[32];
 
     QValueAxis *plot_axisX;
     QValueAxis *plot_axisY;
 
-    QList<QPointF> voltagePts;
-
-    quint32 plot_time, sample_time;
-    qreal plot_volt[32][60000];
+    quint32 plot_time;
     quint16 plot_channel = 0;
+    quint8 firstByte[32];
 };
 
 #endif // PLOT_H
