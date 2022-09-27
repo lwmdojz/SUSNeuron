@@ -1,13 +1,17 @@
 #include "udpsave.h"
+#include "plot.h"
+
 #include <QDebug>
 #include <QSettings>
 #include <QFileDialog>
 
+extern quint8 plotData[64];
+extern quint16 plotSize;
+
 udpSave::udpSave(QObject *parent)
     : QThread{parent}
 {
-    QObject::connect(&udpTimer, &QTimer::timeout, this, &udpSave::handleTimeout);
-    udpTimer.setInterval(100); // 50 frame per second
+
 }
 
 void udpSave::run()
@@ -38,7 +42,7 @@ void udpSave::run()
                     outAppHeadBin.writeRawData(datagram.data(), datagram.size());
 
                     // if data to be plotted > 0
-                    if (plotSize)
+                    if (plotSize != 0)
                     {
                         int j=0;
                         // channelPointer is odd => skip first byte
@@ -49,21 +53,25 @@ void udpSave::run()
                             if ( plotSize % 2 )
                             {
                                 plotData[channelPointer] = datagram[0];
+                                plotSize--;
                             }
                         }
 
                         for ( int i=0; i<(datagram.size()-j); i++ )
                         {
                             plotData[channelPointer+i+j] = datagram[i];
+                            plotSize--;
 
-                            if (!plotSize)
+                            if (plotSize == 0)
                             {
-                                plotData[64] = 1;   // flag: data translation complete
                                 break;
                             }
                         }
                     }
                     // end of plot data processing
+
+                    // channel pointer update
+                    channelPointer = (channelPointer+datagram.size())%64;
                 }
             }
         }
@@ -96,18 +104,6 @@ void udpSave::setFilename(QString FileName)
 QString udpSave::getFilename()
 {
     return fileName;
-}
-
-void udpSave::handleTimeout()
-{
-    plotSize += 64;
-
-//     //generate signal for test ?
-//    for (int i=0; i<64; i++)
-//    {
-//        plotData[i] = plotSize;
-//        plotSize--;
-//    }
 }
 
 

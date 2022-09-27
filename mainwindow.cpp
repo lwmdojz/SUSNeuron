@@ -195,7 +195,6 @@ void MainWindow::on_pushButton_run_clicked()
         {
             udp->term = false;
             udp->start();
-            udp->udpTimer.start();
             plot->plotTimer.start();
         }
         ui->pushButton_run->setText("Running, press to stop");
@@ -208,7 +207,6 @@ void MainWindow::on_pushButton_run_clicked()
         if (udp->isRunning())
         {
             udp->stop();
-            udp->udpTimer.stop();
             plot->plotTimer.stop();
         }
     }

@@ -8,6 +8,9 @@
 #include <QtCharts>
 #include <QtCore>
 
+quint8 plotData[64];
+quint16 plotSize = 0;
+
 Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::ChartTypeCartesian, parent, wFlags),
                                                             plot_axisX(new QValueAxis()),
                                                             plot_axisY(new QValueAxis()),
@@ -36,6 +39,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
     plot_axisX->setRange(0, 1000);
     plot_axisY->setRange(0, 65535);
 
+    plotSize = 64;
 }
 
 Plot::~Plot()
@@ -89,7 +93,7 @@ void Plot::setVoltRange(quint16 range_uv, qint16 center_uv)
 
 void Plot::handleTimeout()
 {
-    if (plotData[64])
+    if (plotSize == 0)
     {
         for (int i=0; i<32; i++)
         {
@@ -100,7 +104,7 @@ void Plot::handleTimeout()
                 plot_series[i]->remove(0);        // remove old data
             }
         }
-        plotData[64] = 0;
+        plotSize = plotSize + 64;
         plot_time++;
     }
 }

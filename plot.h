@@ -13,7 +13,6 @@ QT_USE_NAMESPACE
 
 #define PI 3.14159265358979323846 /* pi */
 
-static quint8 plotData[65];
 
 class Plot : public QChart
 {
