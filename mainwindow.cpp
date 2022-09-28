@@ -2,16 +2,18 @@
 #include "ui_mainwindow.h"
 #include "plot.h"
 
-#include <QtCharts/QChartView>
-#include <QtWidgets/QApplication>
+#include <QtCharts>
+#include <QtWidgets>
 #include <QFileDialog>
 #include <QSettings>
+#include <QtCore>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
+    // IP config
     QFileInfo iniFileInfo("config.ini"); // init, read .Ini file
     if (iniFileInfo.isFile())
     {
@@ -26,74 +28,32 @@ MainWindow::MainWindow(QWidget *parent)
         ip = "192.168.137.24";
     }
 
+    // UDP init
     mrecv = new QUdpSocket;
     msend = new QUdpSocket;
-    qDebug() << "readBufferSize:" << msend->readBufferSize();
-    msend->bind(sendPort);
-    mrecv->bind(sendPort + 2);
+    msend->bind(sendPort);     // for normal commend
+    mrecv->bind(sendPort + 2); // for impedance test
     recvTpye = UdpOther;
 
-    connect(msend, &QUdpSocket::readyRead, this, [=]()
-    {
-        char buf[1024] = {0};
-        QHostAddress cli_addr;  //对方地址
-        quint16 port;  //对方端口
-        qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
-        if (len > 0) {
-            QString str = QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
-            qDebug()<<str;
-            if(recvTpye==UdpRead)
-            {
-                quint8 reg=(quint8)buf[0];
-                qDebug()<<buf[0];
-                ui->label_readValue->setText(QString::number(reg,16));
-            }
-            if(recvTpye==UdpBatt)
-            {
-                quint16 reg=(quint8)buf[0]+(((quint16)buf[1])<<8);
-                qDebug()<<reg;
-                ui->label_batt->setText(QString::number(reg*2)+"mV");
-            }
-            recvTpye=UdpOther;
+    connect(msend, &QUdpSocket::readyRead, this, &MainWindow::handleSend);
 
-            ui->statusbar->showMessage(tr("应答完成!"),2000);
-        } 
-    });
-
-    connect(mrecv, &QUdpSocket::readyRead, this, [=]()
-    {
-        //读取对方发送的数据
-        char buf[2048] = {0};
-        QHostAddress cli_addr;  //对方地址
-        quint16 port;  //对方端口
-        qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
-        qDebug()<<"阻抗测试"<<len;
-        if (len >0) {
-            if(fileName!=""){
-                QFile file(fileName);
-                if (!(file.open(QFile::WriteOnly | QIODevice::Append)))//QIODevice::Append
-                {
-                    file.close();
-                } else{
-                    QTextStream out(&file);
-                    for(int i=0;i<len/2;i++){
-                        out<<((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]<<"\n"; // data I want
-                        plot->loadData(i%32, ((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]);
-                        qDebug()<<(quint8)buf[2*i+1]<<(quint8)buf[2*i];
-                    }
-                    file.close();
-                    plot->nextPt();
-                }
-            }
-        } 
-    });
-    
-    udp = new udpSave();
+    connect(mrecv, &QUdpSocket::readyRead, this, &MainWindow::handleReceive);
 
     ui->comboBox->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
+
     plot = new Plot;
+    plot->setTitle("Dynamic Volt display");
+    plot->legend()->hide();
+    plot->setAnimationOptions(QChart::NoAnimation);
+    plot->setContentsMargins(0, 0, 0, 0);
+    plot->setMargins(QMargins(0, 0, 0, 0));
+    plot->setBackgroundRoundness(0);
+
+    udp = new udpSave();
+
+    ui->graphicsView->setChart(plot);
 }
 
 MainWindow::~MainWindow()
@@ -103,19 +63,73 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//void MainWindow::on_pushButton_SamplingPeriod_clicked()
-//{
-//    QString MyData = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
-//    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
-//}
+// Udp handle function
 
-//void MainWindow::on_pushButton_DSPCutoff_clicked()
-//{
-//    QString MyData = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
-//    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
-//}
+void MainWindow::handleSend()
+{
+    char buf[1024] = {0};
+    QHostAddress cli_addr; // client address
+    quint16 port;          // client port
+    qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
-void MainWindow::on_pushButton_DSPOnoff_clicked()
+    if (len > 0)
+    {
+        QString str = QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
+        qDebug() << str;
+        if (recvTpye == UdpRead)
+        {
+            QString reg = "0x" + QString::number((quint8)buf[0], 16);
+            qDebug() << reg;
+            ui->label_readValue->setText(reg);
+        }
+        if (recvTpye == UdpBatt)
+        {
+            QString bat = QString::number(((quint8)buf[0]+(((quint16)buf[1])<<8)) * 2) + "mV";
+            qDebug() << bat;
+            ui->label_batt->setText(bat);
+        }
+        recvTpye = UdpOther;
+
+        ui->statusbar->showMessage(tr("Responsed!"), 1000);
+    }
+}
+
+// Read data of Impedance test
+void MainWindow::handleReceive()
+{
+    char buf[2048] = {0};
+    QHostAddress cli_addr; // Client address
+    quint16 port;          // Client port
+    qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+    qDebug() << "Impedance test" << len;
+
+    if (len > 0)
+    {
+        if (fileName != "")
+        {
+            QFile file(fileName);
+            if (!(file.open(QFile::WriteOnly | QIODevice::Append))) // QIODevice::Append
+            {
+                file.close();
+            }
+            else
+            {
+                QTextStream out(&file);
+                for (int i = 0; i < len / 2; i++)
+                {
+                    out << ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i] << "\n"; // data I want
+                    qDebug() << (quint8)buf[2 * i + 1] << (quint8)buf[2 * i];
+                }
+                file.close();
+            }
+        }
+    }
+}
+
+
+// Acquisition parameter setting
+
+void MainWindow::on_pushButton_SampleDSP_clicked()
 {
     QString MyData = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
     msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
@@ -141,12 +155,35 @@ void MainWindow::on_pushButton_Bandwidth_clicked()
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
+void MainWindow::on_pushButton_calibrate_clicked()
+{
+    QString str = "a";
+    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+}
+
+void MainWindow::on_pushButton_clear_clicked()
+{
+    QString str = "c";
+    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+}
+
+// Register setting
+
 void MainWindow::on_pushButton_read_clicked()
 {
     recvTpye = UdpRead;
-    QString str = "r" + QString::number(ui->spinBox_Read->value(), 10);
+    QString str = "r" + QString::number(ui->spinBox_ReadAddr->value(), 10);
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
+
+void MainWindow::on_pushButton_write_clicked()
+{
+    recvTpye = UdpRead;
+    QString str = "w" + QString::number(ui->spinBox_writeAddr->value(), 10) + QString::number(ui->spinBox_writeData->value(), 10);
+    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+}
+
+// Acquisition action setting
 
 void MainWindow::on_pushButton_run_clicked()
 {
@@ -158,10 +195,9 @@ void MainWindow::on_pushButton_run_clicked()
         {
             udp->term = false;
             udp->start();
+            plot->plotTimer.start();
         }
         ui->pushButton_run->setText("Running, press to stop");
-        
-        PlotWindow.show();
     }
     else
     {
@@ -169,19 +205,23 @@ void MainWindow::on_pushButton_run_clicked()
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
         ui->pushButton_run->setText("Press to run");
         if (udp->isRunning())
+        {
             udp->stop();
+            plot->plotTimer.stop();
+        }
     }
 }
 
 void MainWindow::on_pushButton_savePath_clicked()
 {
-    udp->fileName = QFileDialog::getSaveFileName(this, tr("保存文件（如果存在删除重建）"), "", tr("(*.dat)"));
-    QFileInfo fileInfo(udp->fileName);
+    udp->setFilename(QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.dat)")));
+    QFileInfo fileInfo(udp->getFilename());
+
     if (fileInfo.isFile())
     {
         fileInfo.dir().remove(fileInfo.fileName());
     }
-    qDebug() << udp->fileName;
+    qDebug() << udp->getFilename();
 }
 
 void MainWindow::on_pushButton_getBatt_clicked()
@@ -197,11 +237,7 @@ void MainWindow::on_pushButton_shutdown_clicked()
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
-void MainWindow::on_pushButton_calibrate_clicked()
-{
-    QString str = "c";
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-}
+// Impedance measurement setting
 
 void MainWindow::on_pushButton_channelset_clicked()
 {
@@ -217,7 +253,7 @@ void MainWindow::on_pushButton_currentset_clicked()
 
 void MainWindow::on_pushButton_impedancetest_clicked()
 {
-    fileName = QFileDialog::getSaveFileName(this, tr("保存文件（如果存在删除重建）"), "", tr("(*.csv)"));
+    fileName = QFileDialog::getSaveFileName(this, tr("Save file (if file existed, delete and rebuild it"), "", tr("(*.csv)"));
     QFileInfo fileInfo(fileName);
     if (fileInfo.isFile())
     {
@@ -241,3 +277,7 @@ void MainWindow::on_pushButton_zcount_clicked()
     QString str = "j" + QString::number(ui->spinBox_zcount->value(), 10);
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
+
+
+
+

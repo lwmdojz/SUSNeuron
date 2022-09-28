@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>971</width>
+    <width>966</width>
     <height>860</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -41,7 +47,7 @@
               <number>10000</number>
              </property>
              <property name="value">
-              <number>5000</number>
+              <number>1000</number>
              </property>
             </widget>
            </item>
@@ -75,7 +81,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_DSPOnoff">
+            <widget class="QPushButton" name="pushButton_SampleDSP">
              <property name="text">
               <string>Set</string>
              </property>
@@ -101,7 +107,7 @@
            <item>
             <widget class="QPushButton" name="pushButton_getBatt">
              <property name="text">
-              <string>获取电池电压</string>
+              <string>Get bettary </string>
              </property>
             </widget>
            </item>
@@ -115,7 +121,7 @@
            <item>
             <widget class="QPushButton" name="pushButton_shutdown">
              <property name="text">
-              <string>关机</string>
+              <string>Shutdown</string>
              </property>
             </widget>
            </item>
@@ -126,7 +132,7 @@
            <item>
             <widget class="QPushButton" name="pushButton_savePath">
              <property name="text">
-              <string>保存路径</string>
+              <string>Save path</string>
              </property>
             </widget>
            </item>
@@ -162,7 +168,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="spinBox_Read"/>
+            <widget class="QSpinBox" name="spinBox_ReadAddr"/>
            </item>
            <item>
             <widget class="QLabel" name="label_4">
@@ -174,7 +180,7 @@
            <item>
             <widget class="QLabel" name="label_readValue">
              <property name="text">
-              <string>-</string>
+              <string/>
              </property>
             </widget>
            </item>
@@ -202,7 +208,7 @@
            <item>
             <widget class="QLabel" name="label_9">
              <property name="text">
-              <string>数据：</string>
+              <string>Data:</string>
              </property>
             </widget>
            </item>
@@ -212,7 +218,7 @@
            <item>
             <widget class="QPushButton" name="pushButton_write">
              <property name="text">
-              <string>写入</string>
+              <string>Write Value</string>
              </property>
             </widget>
            </item>
@@ -471,21 +477,21 @@
            <item>
             <widget class="QPushButton" name="pushButton_Bandwidth">
              <property name="text">
-              <string>设置</string>
+              <string>Set parameter</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_calibrate">
              <property name="text">
-              <string>校准</string>
+              <string>Calibrate</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_clear">
              <property name="text">
-              <string>清除校准</string>
+              <string>Clear calibrate</string>
              </property>
             </widget>
            </item>
@@ -607,7 +613,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_impedancetest">
          <property name="text">
-          <string>测试</string>
+          <string>Run test</string>
          </property>
         </widget>
        </item>
@@ -615,7 +621,14 @@
      </widget>
     </item>
     <item row="0" column="1" rowspan="5">
-     <widget class="QChartView" name="graphicsView"/>
+     <widget class="QChartView" name="graphicsView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -624,7 +637,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>971</width>
+     <width>966</width>
      <height>25</height>
     </rect>
    </property>

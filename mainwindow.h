@@ -19,6 +19,7 @@ enum UdpRecvType {
     UdpBatt
 };
 
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -27,51 +28,48 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     Ui::MainWindow *ui;
-    QMainWindow PlotWindow;
     Plot *plot;
 
 private slots:
-//    void on_pushButton_SamplingPeriod_clicked();
 
-//    void on_pushButton_DSPCutoff_clicked();
-
-    void on_pushButton_DSPOnoff_clicked();
-
+    // Acquisition parameter setting
+    void on_pushButton_SampleDSP_clicked();
     void on_pushButton_Bandwidth_clicked();
+    void on_pushButton_calibrate_clicked();
+    void on_pushButton_clear_clicked();
 
-
+    // Register setting
     void on_pushButton_read_clicked();
+    void on_pushButton_write_clicked();
 
-    void on_pushButton_run_clicked();
-
+    // Acquisition action setting
     void on_pushButton_savePath_clicked();
-
+    void on_pushButton_run_clicked();
     void on_pushButton_getBatt_clicked();
-
     void on_pushButton_shutdown_clicked();
 
-    void on_pushButton_calibrate_clicked();
-
+    // Impedance measurement setting
     void on_pushButton_channelset_clicked();
-
     void on_pushButton_currentset_clicked();
-
     void on_pushButton_impedancetest_clicked();
-
     void on_pushButton_hz_clicked();
-
     void on_pushButton_zcount_clicked();
 
+    // Others
+    void handleSend();
+    void handleReceive();
+
 private:
+
     QUdpSocket  *mrecv;
     QUdpSocket  *msend;
     udpSave *udp;
-    QString ip="192.168.137.102";
-    quint16 sendPort=2333;
+    QString ip;
+    quint16 sendPort = 2333;
+    quint16 receivePott = 2335;
     UdpRecvType recvTpye;
-    QTimer *plotting_timer;
-    QString fileName="";
 
+    QString fileName = "";
 
 };
 #endif // MAINWINDOW_H
