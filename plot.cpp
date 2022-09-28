@@ -8,8 +8,7 @@
 #include <QtCharts>
 #include <QtCore>
 
-quint8 plotData[64];
-quint16 plotSize = 0;
+
 
 Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::ChartTypeCartesian, parent, wFlags),
                                                             plot_axisX(new QValueAxis()),
@@ -36,10 +35,18 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
         plot_series[i]->attachAxis(plot_axisY);
     }
 
-    plot_axisX->setRange(0, 1000);
+//            plot_series[0] = new QLineSeries(this);
+//            plot_series[0]->setPen(green);
+//            plot_series[0]->useOpenGL();
+
+//            addSeries(plot_series[0]);
+//            plot_series[0]->attachAxis(plot_axisX);
+//            plot_series[0]->attachAxis(plot_axisY);
+
+    plot_axisX->setRange(-200, 200);
     plot_axisY->setRange(0, 65535);
 
-    plotSize = 64;
+    memset(plot_count,0,sizeof(int)*32);
 }
 
 Plot::~Plot()
@@ -47,39 +54,31 @@ Plot::~Plot()
 
 }
 
-/**
- * @brief Plot::loadData
- *  load the data from udp
- * @param channel
- * @param data
- */
-void Plot::loadData(quint16 channel, quint16 data)
+
+void Plot::plotData(quint8 plotData[64])
 {
-    if (!channel)       // temp, plot channel 0 only
+    qDebug() << "plot data get";
+    for (int i=0; i<32; i++)
     {
-        plot_series[channel]->append(plot_time, data);
-        if (plot_series[channel]->count() > 600)   // 10Hz * 60s = 600 pts
+        plot_series[i]->append( plot_time, ((quint16)plotData[2*i+1]<<8) + plotData[2*i] );
+        plot_count[i] += 1;
+
+        if (plot_count[i] > 200)    // 10Hz * 60s = 600 pts
         {
-            plot_series[channel]->remove(0);        // remove old data
+            qDebug() << "delete data";
+            plot_series[i]->remove(i);        // remove old data
         }
     }
-}
-
-void Plot::nextPt()
-{
     plot_time++;
-    qDebug() << plot_time;
-    scroll(1,0);
 }
 
-/**
- * @brief Set current plotting channel
- * @param channel
- */
-void Plot::setChannel(quint16 channel)
+void Plot::handleTimeout()
 {
-    plot_channel = channel;
+    qDebug() << "ask for data signal sent\n";
+    scroll(1,0);
+    emit getPlotData();
 }
+
 
 void Plot::setTimeRange(quint16 range_ms)
 {
@@ -89,23 +88,5 @@ void Plot::setTimeRange(quint16 range_ms)
 void Plot::setVoltRange(quint16 range_uv, qint16 center_uv)
 {
     plot_axisY->setRange(center_uv - range_uv / 2, center_uv + range_uv / 2);
-}
-
-void Plot::handleTimeout()
-{
-    if (plotSize == 0)
-    {
-        for (int i=0; i<32; i++)
-        {
-            plot_series[i]->append( plot_time, ((quint16)plotData[2*i+1]<<8) + plotData[2*i] );
-
-            if (plot_series[i]->count() > 600)    // 10Hz * 60s = 600 pts
-            {
-                plot_series[i]->remove(0);        // remove old data
-            }
-        }
-        plotSize = plotSize + 64;
-        plot_time++;
-    }
 }
 

@@ -23,12 +23,12 @@ public:
 
     QTimer plotTimer;
 
+signals:
+    void getPlotData();
+
 public slots:
+    void plotData(quint8 plotData[64]);
 
-    void loadData(quint16 channel, quint16 data);
-    void nextPt();
-
-    void setChannel(quint16 channel);
     void setTimeRange(quint16 range_ms);
     void setVoltRange(quint16 range_uv, qint16 center_uv);
 
@@ -36,6 +36,7 @@ public slots:
 
 private:
     QLineSeries *plot_series[32];
+    quint16 plot_count[32];
 
     QValueAxis *plot_axisX;
     QValueAxis *plot_axisY;

@@ -5,9 +5,6 @@
 #include <QSettings>
 #include <QFileDialog>
 
-extern quint8 plotData[64];
-extern quint16 plotSize;
-
 udpSave::udpSave(QObject *parent)
     : QThread{parent}
 {
@@ -18,6 +15,7 @@ void udpSave::run()
 {
     QUdpSocket *mrecv = new QUdpSocket;
     QByteArray datagram;
+    plotSize = 0;
 
     mrecv->bind(2334);
 
@@ -45,25 +43,25 @@ void udpSave::run()
                     if (plotSize != 0)
                     {
                         int j=0;
-                        // channelPointer is odd => skip first byte
-                        if ( channelPointer % 2 )
+                        // channelPointer is odd, even byte to be plot => skip first byte
+                        if ( channelPointer % 2 && !plotSize % 2)
                         {
                             j=1;
-                            // odd byte to be plot => store first byte as high
-                            if ( plotSize % 2 )
-                            {
-                                plotData[channelPointer] = datagram[0];
-                                plotSize--;
-                            }
+//                            qDebug() << "2";
+
                         }
 
-                        for ( int i=0; i<(datagram.size()-j); i++ )
+                        for ( int i=j; i<datagram.size(); i++ )
                         {
-                            plotData[channelPointer+i+j] = datagram[i];
+//                            qDebug() << "1";
+
+                            plotData[channelPointer+i] = datagram[i];
                             plotSize--;
 
                             if (plotSize == 0)
                             {
+                                qDebug() << "thread data send\n";
+                                emit toPlot(plotData);
                                 break;
                             }
                         }
@@ -79,6 +77,13 @@ void udpSave::run()
     mrecv->close();
     mrecv->deleteLater();
 }
+
+void udpSave::getPlotData()
+{
+    qDebug() << "thread signal received\n";
+    plotSize = 64;
+}
+
 
 void udpSave::stop()
 {
