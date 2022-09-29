@@ -44,17 +44,13 @@ void udpSave::run()
                     {
                         int j=0;
                         // channelPointer is odd, even byte to be plot => skip first byte
-                        if ( channelPointer % 2 && !plotSize % 2)
+                        if ( (channelPointer % 2) && !(plotSize % 2))
                         {
                             j=1;
-//                            qDebug() << "2";
-
                         }
 
                         for ( int i=j; i<datagram.size(); i++ )
                         {
-//                            qDebug() << "1";
-
                             plotData[channelPointer+i] = datagram[i];
                             plotSize--;
 

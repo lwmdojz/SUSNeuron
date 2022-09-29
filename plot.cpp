@@ -8,15 +8,13 @@
 #include <QtCharts>
 #include <QtCore>
 
-
-
 Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::ChartTypeCartesian, parent, wFlags),
                                                             plot_axisX(new QValueAxis()),
                                                             plot_axisY(new QValueAxis()),
                                                             plot_time(0) // initiate point position
 {
     QObject::connect(&plotTimer, &QTimer::timeout, this, &Plot::handleTimeout);
-    plotTimer.setInterval(100); // 10 frame per second
+    plotTimer.setInterval(100); // 1000 frame per second
 
     QPen green(Qt::red);
     green.setWidth(0);
@@ -35,15 +33,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
         plot_series[i]->attachAxis(plot_axisY);
     }
 
-//            plot_series[0] = new QLineSeries(this);
-//            plot_series[0]->setPen(green);
-//            plot_series[0]->useOpenGL();
-
-//            addSeries(plot_series[0]);
-//            plot_series[0]->attachAxis(plot_axisX);
-//            plot_series[0]->attachAxis(plot_axisY);
-
-    plot_axisX->setRange(-200, 200);
+    plot_axisX->setRange(0, 100);
     plot_axisY->setRange(0, 65535);
 
     memset(plot_count,0,sizeof(int)*32);
@@ -63,7 +53,7 @@ void Plot::plotData(quint8 plotData[64])
         plot_series[i]->append( plot_time, ((quint16)plotData[2*i+1]<<8) + plotData[2*i] );
         plot_count[i] += 1;
 
-        if (plot_count[i] > 200)    // 10Hz * 60s = 600 pts
+        if (plot_count[i] > 1000)    // 10Hz * 60s = 600 pts
         {
             qDebug() << "delete data";
             plot_series[i]->remove(i);        // remove old data
@@ -75,7 +65,7 @@ void Plot::plotData(quint8 plotData[64])
 void Plot::handleTimeout()
 {
     qDebug() << "ask for data signal sent\n";
-    scroll(1,0);
+//    plot_axisX->setRange(plot_time-200, plot_time+200);
     emit getPlotData();
 }
 
