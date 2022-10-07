@@ -1,12 +1,15 @@
+/** udpSave.cpp
+ *
+ *  send all data to plot   2022.10.7
+ *
+ */
+
 #include "udpsave.h"
 #include "plot.h"
 
 #include <QDebug>
 #include <QSettings>
 #include <QFileDialog>
-
-extern quint8 plotData[64];
-extern quint16 plotSize;
 
 udpSave::udpSave(QObject *parent)
     : QThread{parent}
@@ -18,6 +21,7 @@ void udpSave::run()
 {
     QUdpSocket *mrecv = new QUdpSocket;
     QByteArray datagram;
+    plotSize = 0;
 
     mrecv->bind(2334);
 
@@ -41,37 +45,35 @@ void udpSave::run()
                     mrecv->readDatagram(datagram.data(), datagram.size());
                     outAppHeadBin.writeRawData(datagram.data(), datagram.size());
 
-                    // if data to be plotted > 0
-                    if (plotSize != 0)
-                    {
-                        int j=0;
-                        // channelPointer is odd => skip first byte
-                        if ( channelPointer % 2 )
-                        {
-                            j=1;
-                            // odd byte to be plot => store first byte as high
-                            if ( plotSize % 2 )
-                            {
-                                plotData[channelPointer] = datagram[0];
-                                plotSize--;
-                            }
-                        }
+                    emit toPlot(&datagram);
 
-                        for ( int i=0; i<(datagram.size()-j); i++ )
-                        {
-                            plotData[channelPointer+i+j] = datagram[i];
-                            plotSize--;
+//                    // if data to be plotted > 0
+//                    if (plotSize != 0)
+//                    {
+//                        int j=0;
+//                        // channelPointer is odd, even byte to be plot => skip first byte
+//                        if ( (channelPointer % 2) && !(plotSize % 2))
+//                        {
+//                            j=1;
+//                        }
 
-                            if (plotSize == 0)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    // end of plot data processing
+//                        for ( int i=j; i<datagram.size(); i++ )
+//                        {
+//                            plotData[channelPointer+i] = datagram[i];
+//                            plotSize--;
 
-                    // channel pointer update
-                    channelPointer = (channelPointer+datagram.size())%64;
+//                            if (plotSize == 0)
+//                            {
+//                                qDebug() << "thread data send\n";
+//                                emit toPlot(*plotData);
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    // end of plot data processing
+
+//                    // channel pointer update
+//                    channelPointer = (channelPointer+datagram.size())%64;
                 }
             }
         }
@@ -79,6 +81,13 @@ void udpSave::run()
     mrecv->close();
     mrecv->deleteLater();
 }
+
+void udpSave::getPlotData()
+{
+    qDebug() << "thread signal received\n";
+    plotSize = 64;
+}
+
 
 void udpSave::stop()
 {
