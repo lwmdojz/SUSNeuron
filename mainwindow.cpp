@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->graphicsView->setChart(plot);
 
-    connect(plot, &Plot::getPlotData, udp, &udpSave::getPlotData);
+//    connect(plot, &Plot::getPlotData, udp, &udpSave::getPlotData);
     connect(udp, &udpSave::toPlot, plot, &Plot::plotData);
 }
 
@@ -198,7 +198,7 @@ void MainWindow::on_pushButton_run_clicked()
         {
             udp->term = false;
             udp->start();
-            plot->plotTimer.start();
+//            plot->plotTimer.start();
         }
         ui->pushButton_run->setText("Running, press to stop");
     }
@@ -210,7 +210,7 @@ void MainWindow::on_pushButton_run_clicked()
         if (udp->isRunning())
         {
             udp->stop();
-            plot->plotTimer.stop();
+//            plot->plotTimer.stop();
         }
     }
 }
