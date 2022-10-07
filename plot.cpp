@@ -50,7 +50,7 @@ Plot::~Plot()
 }
 
 
-void Plot::plotData(quint8 plotData[64])
+void Plot::plotData(QByteArray *datagram)
 {
     qDebug() << "plot data get";
     for (int i=0; i<32; i++)
@@ -70,12 +70,30 @@ void Plot::plotData(quint8 plotData[64])
     plot_time++;
 }
 
-void Plot::handleTimeout()
-{
-    qDebug() << "ask for data signal sent\n";
-//    plot_axisX->setRange(plot_time-200, plot_time+200);
-    emit getPlotData();
-}
+//void Plot::plotData(quint8 plotData[64])
+//{
+//    qDebug() << "plot data get";
+//    for (int i=0; i<32; i++)
+//    {
+//        plot_series[i]->append( plot_time, ((quint16)plotData[2*i+1]<<8) + plotData[2*i] );
+//        plot_count[i] += 1;
+
+//        if (plot_count[i] > 1000)    // 10Hz * 60s = 600 pts
+//        {
+//            qDebug() << "delete data";
+//            plot_series[i]->remove(i);        // remove old data
+//        }
+//    }
+//    plot_time++;
+//}
+
+
+//void Plot::handleTimeout()
+//{
+//    qDebug() << "ask for data signal sent\n";
+////    plot_axisX->setRange(plot_time-200, plot_time+200);
+//    emit getPlotData();
+//}
 
 
 void Plot::setTimeRange(quint16 range_ms)

@@ -28,7 +28,7 @@ public:
     bool term = false;
 
 signals:
-    void toPlot(quint8 plotData[64]);
+    void toPlot(QByteArray *datagram);
 
 public slots:
     void getPlotData();
@@ -38,7 +38,7 @@ protected:
 
 private:
     quint16 plotSize = 0;
-    quint8 plotData[64];
+//    quint8 plotData[64];
 
     quint16 sendPort = 2334;
     QString fileName = "";

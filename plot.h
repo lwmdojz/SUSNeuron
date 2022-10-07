@@ -21,18 +21,18 @@ public:
     Plot(QGraphicsItem *parent = nullptr, Qt::WindowFlags wFlags = {});
     virtual ~Plot();
 
-    QTimer plotTimer;
+//    QTimer plotTimer;
 
 signals:
     void getPlotData();
 
 public slots:
-    void plotData(quint8 plotData[64]);
+    void plotData(QByteArray *datagram);
 
     void setTimeRange(quint16 range_ms);
     void setVoltRange(quint16 range_uv, qint16 center_uv);
 
-    void handleTimeout();
+//    void handleTimeout();
 
 private:
     QLineSeries *plot_series[32];
