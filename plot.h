@@ -36,8 +36,6 @@ public slots:
 
 private:
     QLineSeries *plot_series[32];
-    quint16 plot_count[32];
-    QByteArray tempStack;
 
     QValueAxis *plot_axisX;
     QValueAxis *plot_axisY;

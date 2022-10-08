@@ -45,35 +45,30 @@ void udpSave::run()
                     mrecv->readDatagram(datagram.data(), datagram.size());
                     outAppHeadBin.writeRawData(datagram.data(), datagram.size());
 
-                    emit toPlot(&datagram);
+                    // if data to be plotted > 0
+                    if (plotSize != 0)
+                    {
+                        int j=0;
+                        // channelPointer is odd, even byte to be plot => skip first byte
+                        if ((channelPointer % 2) && !(plotSize % 2)) { j=1; }
 
-//                    // if data to be plotted > 0
-//                    if (plotSize != 0)
-//                    {
-//                        int j=0;
-//                        // channelPointer is odd, even byte to be plot => skip first byte
-//                        if ( (channelPointer % 2) && !(plotSize % 2))
-//                        {
-//                            j=1;
-//                        }
+                        for ( int i=j; i<datagram.size(); i++ )
+                        {
+                            plotData[channelPointer+i] = datagram[i];
+                            plotSize--;
 
-//                        for ( int i=j; i<datagram.size(); i++ )
-//                        {
-//                            plotData[channelPointer+i] = datagram[i];
-//                            plotSize--;
+                            if (plotSize == 0)
+                            {
+                                qDebug() << "thread data send\n";
+                                emit toPlot(plotData);
+                                break;
+                            }
+                        }
+                    }
+                    // end of plot data processing
 
-//                            if (plotSize == 0)
-//                            {
-//                                qDebug() << "thread data send\n";
-//                                emit toPlot(*plotData);
-//                                break;
-//                            }
-//                        }
-//                    }
-//                    // end of plot data processing
-
-//                    // channel pointer update
-//                    channelPointer = (channelPointer+datagram.size())%64;
+                    // channel pointer update
+                    channelPointer = (channelPointer+datagram.size())%64;
                 }
             }
         }
