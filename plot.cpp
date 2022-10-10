@@ -14,7 +14,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
                                                             plot_time(0) // initiate point position
 {
     QObject::connect(&plotTimer, &QTimer::timeout, this, &Plot::handleTimeout);
-    plotTimer.setInterval(10); // 50 frame per second
+    plotTimer.setInterval(25); // 50 frame per second
 
     QPen green(Qt::red);
     green.setWidth(0);
@@ -26,20 +26,16 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
     {
         plot_series[i] = new QLineSeries(this);
         plot_series[i]->setPen(green);
-//        plot_series[i]->useOpenGL();
+        plot_series[i]->useOpenGL();
 
-//         addSeries(plot_series[i]);
-//         plot_series[i]->attachAxis(plot_axisX);
-//         plot_series[i]->attachAxis(plot_axisY);
+        addSeries(plot_series[i]);
+        plot_series[i]->attachAxis(plot_axisX);
+        plot_series[i]->attachAxis(plot_axisY);
+        plot_series[i]->setVisible(false);
     }
+    plot_series[0]->setVisible(true);
 
-    plot_series[0]->useOpenGL();
-
-    addSeries(plot_series[0]);
-    plot_series[0]->attachAxis(plot_axisX);
-    plot_series[0]->attachAxis(plot_axisY);
-
-    plot_axisX->setRange(0, 100);
+    plot_axisX->setRange(-20, 220);
     plot_axisY->setRange(0, 65535);
 
 }
@@ -52,27 +48,31 @@ Plot::~Plot()
 
 void Plot::plotData(quint8 plotData[64])
 {
-    qDebug() << "plot data get";
-    for (int i=0; i<32; i++)
-    {
-        plot_series[i]->append( plot_time, ((quint16)(plotData[2*i+1])<<8)+(quint16)plotData[2*i] );
-    }
+//    qDebug() << "plot data get";
 
-    if (plot_time > 100)    // 10Hz * 60s = 600 pts
+    if (plot_time > 200)    // 10Hz * 60s = 600 pts
     {
         for (int i=0; i<32; i++)
         {
             plot_series[i]->remove(0);
+            plot_series[i]->append( plot_time, ((quint16)(plotData[2*i+1])<<8)+(quint16)plotData[2*i] );
         }
-        qDebug() << "delete data";
-        scroll(this->plotArea().width() / 100, 0);
+//        qDebug() << "delete data";
+        scroll(this->plotArea().width() / 240, 0);
+    }
+    else
+    {
+        for (int i=0; i<32; i++)
+        {
+            plot_series[i]->append( plot_time, ((quint16)(plotData[2*i+1])<<8)+(quint16)plotData[2*i] );
+        }
     }
     plot_time++;
 }
 
 void Plot::handleTimeout()
 {
-    qDebug() << "ask for data signal sent\n";
+//    qDebug() << "ask for data signal sent\n";
 //    plot_axisX->setRange(plot_time-200, plot_time+200);
     emit getPlotData();
 }

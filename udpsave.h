@@ -16,7 +16,6 @@ public:
 
     void stop();
 
-    void binarySave();
     void plotSave();
 
     void udpInit(quint16 port, QString FileName);

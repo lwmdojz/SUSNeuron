@@ -39,30 +39,17 @@ void udpSave::run()
                     mrecv->readDatagram(datagram.data(), datagram.size());
                     outAppHeadBin.writeRawData(datagram.data(), datagram.size());
 
-                    // if data to be plotted > 0
                     if (plotSize != 0)
                     {
-                        int j=0;
-                        // channelPointer is odd, even byte to be plot => skip first byte
-                        if ((channelPointer % 2) && !(plotSize % 2)) { j=1; }
-
-                        for ( int i=j; i<datagram.size(); i++ )
+                        for ( int i=0; i<64; i++ )
                         {
-                            plotData[channelPointer+i] = datagram[i];
-                            plotSize--;
+                            plotData[i] = datagram[i];
 
-                            if (plotSize == 0)
-                            {
-                                qDebug() << "thread data send\n";
-                                emit toPlot(plotData);
-                                break;
-                            }
                         }
+                        emit toPlot(plotData);
+                        plotSize = 0;
+                        // end of plot data processing
                     }
-                    // end of plot data processing
-
-                    // channel pointer update
-                    channelPointer = (channelPointer+datagram.size())%64;
                 }
             }
         }
@@ -73,7 +60,7 @@ void udpSave::run()
 
 void udpSave::getPlotData()
 {
-    qDebug() << "thread signal received\n";
+//    qDebug() << "thread signal received\n";
     plotSize = 64;
 }
 
