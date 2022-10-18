@@ -37,19 +37,8 @@ void udpSave::run()
                     datagram.resize(mrecv->pendingDatagramSize());
 
                     mrecv->readDatagram(datagram.data(), datagram.size());
+                    emit toProcess(datagram);
                     outAppHeadBin.writeRawData(datagram.data(), datagram.size());
-
-                    if (plotSize != 0)
-                    {
-                        for ( int i=0; i<64; i++ )
-                        {
-                            plotData[i] = datagram[i];
-
-                        }
-                        emit toPlot(plotData);
-                        plotSize = 0;
-                        // end of plot data processing
-                    }
                 }
             }
         }
@@ -58,22 +47,9 @@ void udpSave::run()
     mrecv->deleteLater();
 }
 
-void udpSave::getPlotData()
-{
-//    qDebug() << "thread signal received\n";
-    plotSize = 64;
-}
-
-
 void udpSave::stop()
 {
     term = true;
-}
-
-void udpSave::udpInit(quint16 port, QString FileName)
-{
-    sendPort = port;
-    fileName = FileName;
 }
 
 void udpSave::setPort(quint16 port)

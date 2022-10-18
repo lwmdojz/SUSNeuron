@@ -24,10 +24,9 @@ public:
     QTimer plotTimer;
 
 signals:
-    void getPlotData();
 
 public slots:
-    void plotData(quint8 plotData[64]);
+    void getPlotData(quint8 plotData[64]);
 
     void setTimeRange(quint16 range_ms);
     void setVoltRange(quint16 range_uv, qint16 center_uv);

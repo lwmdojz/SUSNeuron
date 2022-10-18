@@ -16,34 +16,25 @@ public:
 
     void stop();
 
-    void plotSave();
-
-    void udpInit(quint16 port, QString FileName);
     void setPort(quint16 port);
     void setFilename(QString FileName);
 
     QString getFilename();
 
-    bool term = false;
+    bool term = false; 
 
 signals:
-    void toPlot(quint8 plotData[64]);
+    void toProcess(QByteArray datagram);
 
 public slots:
-    void getPlotData();
+    void
 
 protected:
     void run();
 
 private:
-    quint16 plotSize = 0;
-    quint8 plotData[64];
-
     quint16 sendPort = 2334;
     QString fileName = "";
-
-    quint16 channelPointer = 0;
-
 };
 
 #endif // UDPSAVE_H

@@ -14,7 +14,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
                                                             plot_time(0) // initiate point position
 {
     QObject::connect(&plotTimer, &QTimer::timeout, this, &Plot::handleTimeout);
-    plotTimer.setInterval(25); // 50 frame per second
+    plotTimer.setInterval(100); // 50 frame per second
 
     QPen green(Qt::red);
     green.setWidth(0);
@@ -46,7 +46,7 @@ Plot::~Plot()
 }
 
 
-void Plot::plotData(quint8 plotData[64])
+void Plot::getPlotData(quint8 plotData[64])
 {
 //    qDebug() << "plot data get";
 
@@ -57,7 +57,6 @@ void Plot::plotData(quint8 plotData[64])
             plot_series[i]->remove(0);
             plot_series[i]->append( plot_time, ((quint16)(plotData[2*i+1])<<8)+(quint16)plotData[2*i] );
         }
-//        qDebug() << "delete data";
         scroll(this->plotArea().width() / 240, 0);
     }
     else
@@ -74,7 +73,7 @@ void Plot::handleTimeout()
 {
 //    qDebug() << "ask for data signal sent\n";
 //    plot_axisX->setRange(plot_time-200, plot_time+200);
-    emit getPlotData();
+    // emit getPlotData();
 }
 
 

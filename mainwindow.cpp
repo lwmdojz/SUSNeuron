@@ -56,8 +56,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphicsView->setChart(plot);
 //    ui->graphicsView->setRubberBand(QChartView::RectangleRubberBand);
 
-    connect(plot, &Plot::getPlotData, udp, &udpSave::getPlotData);
-    connect(udp, &udpSave::toPlot, plot, &Plot::plotData);
+    // connect(plot, &Plot::getPlotData, udp, &udpSave::getPlotData);
+    connect(udp, &udpSave::toProcess, dataprocess, &dataprocess::getRawData);
+    connect(dataprocess, &dataprocess::PlotData, Plot, &Plot::);
 }
 
 MainWindow::~MainWindow()
