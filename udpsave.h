@@ -27,14 +27,14 @@ signals:
     void toProcess(QByteArray datagram);
 
 public slots:
-    void
+//    void
 
 protected:
     void run();
 
 private:
     quint16 sendPort = 2334;
-    QString fileName = "";
+    QString fileName = "Vdata";
 };
 
 #endif // UDPSAVE_H

@@ -22,16 +22,14 @@ public:
     virtual ~Plot();
 
     QTimer plotTimer;
-
-signals:
-
-public slots:
+        
     void getPlotData(quint8 plotData[64]);
 
     void setTimeRange(quint16 range_ms);
     void setVoltRange(quint16 range_uv, qint16 center_uv);
 
-    void handleTimeout();
+public slots:
+    void Plotting(QList<QPointF> VoltagePts[32]);
 
 private:
     QLineSeries *plot_series[32];

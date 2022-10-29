@@ -61,15 +61,17 @@ private slots:
 
 private:
 
-    QUdpSocket  *mrecv;
+    QUdpSocket  *mrecvIMP;
     QUdpSocket  *msend;
     udpSave *udp;
     QString ip;
+
     quint16 sendPort = 2333;
-    quint16 receivePott = 2335;
+    quint16 IMPPort = 2335;
+
     UdpRecvType recvTpye;
 
-    QString fileName = "";
+    QString IMPDataFileName = "";
 
 };
 #endif // MAINWINDOW_H

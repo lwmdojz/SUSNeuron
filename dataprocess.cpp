@@ -1,4 +1,5 @@
 #include "dataprocess.h"
+#include "qpoint.h"
 
 dataprocess::dataprocess(QObject *parent)
     : QThread{parent}
@@ -6,32 +7,56 @@ dataprocess::dataprocess(QObject *parent)
 
 }
 
-
 void dataprocess::run()
 {
-    if (VoltageChain[0].size() < 3000)
-    {
-        quit();
-    }
+    // notch filter
 
-    for (int i = 0; i < sampleRate; i++)
-    {
-        
-    }
+    // trigger signal, transfer data to main plotting thread
+    emit toPlot(VoltagePts);
+}
+
+
+void dataprocess::processInit(quint16 newSampleRate, quint16 newNotchFreq)
+{
+    // maximum # of points: 60s * sample rate 
+    MaxPts = newSampleRate*60;
+
+    // notch filter frequency
+    notchFreq = newNotchFreq;
+}
+
+void dataprocess::setNotchFreq(quint16 newNotchFreq)
+{
+    notchFreq = newNotchFreq;
+}
+
+void dataprocess::setMaxPts(quint16 newSampleRate)
+{
+    MaxPts = newSampleRate*60;
 }
 
 void dataprocess::getRawData(QByteArray datagram)
 {
+    // estimate time
+    ETimer.start();
+
     for (quint16 i = 0; i < datagram.size(); i+=2)
     {
-        VoltageChain[i%64/2].append(((quint16)(datagram[i+1])<<8)+(quint16)datagram[i]);
+        quint16 n = i%64/2;
+
+        qreal Volt =((quint16)(datagram[i+1])<<8) + (quint16)datagram[i];
+        Volt = Volt*10/65535 - 5;
+
+        VoltagePts[n].append(QPointF(timeStamp, Volt));
+
+        if (VoltagePts[n].size() > MaxPts)
+        {
+            VoltagePts[n].removeFirst();
+        }
     }
+    this->run();
 }
 
-void processInit(quint16 Sample_Rate, quint16 Cutoff_Frequency)
-{
-    sampleRate = Sample_Rate;
-    cutoffFreq = Cutoff_Frequency;
-}
+
 
 

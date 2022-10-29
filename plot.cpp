@@ -13,8 +13,9 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
                                                             plot_axisY(new QValueAxis()),
                                                             plot_time(0) // initiate point position
 {
-    QObject::connect(&plotTimer, &QTimer::timeout, this, &Plot::handleTimeout);
-    plotTimer.setInterval(100); // 50 frame per second
+
+//    QObject::connect(&plotTimer, &QTimer::timeout, this, &Plot::handleTimeout);
+//    plotTimer.setInterval(100); // 50 frame per second
 
     QPen green(Qt::red);
     green.setWidth(0);
@@ -35,8 +36,25 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
     }
     plot_series[0]->setVisible(true);
 
+    setTitle("Volt");
+
     plot_axisX->setRange(-20, 220);
+    plot_axisX->setTickCount(10);
+    plot_axisX->setMinorTickCount(1);
+
     plot_axisY->setRange(0, 65535);
+    plot_axisY->setTickCount(5);
+
+    // settings for a better look
+    setTitle("Dynamic Volt display");
+    legend()->hide();
+    setAnimationOptions(QChart::NoAnimation);
+    setContentsMargins(0, 0, 0, 0);
+    setMargins(QMargins(0, 0, 0, 0));
+    setBackgroundRoundness(0);
+
+
+
 
 }
 
@@ -69,11 +87,9 @@ void Plot::getPlotData(quint8 plotData[64])
     plot_time++;
 }
 
-void Plot::handleTimeout()
+void Plot::Plotting(QList<QPointF> VoltagePts[32])
 {
-//    qDebug() << "ask for data signal sent\n";
-//    plot_axisX->setRange(plot_time-200, plot_time+200);
-    // emit getPlotData();
+    plot_series[0]->replace(VoltagePts[0]);
 }
 
 

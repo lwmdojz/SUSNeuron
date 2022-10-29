@@ -11,10 +11,13 @@ public:
     explicit dataprocess(QObject *parent = nullptr);
 
     void stop();
-    void processInit(quint16 sampleRate, quint16 cutoffFreq);
+
+    void processInit(quint16 newSampleRate, quint16 newNotchFreq);
+    void setMaxPts(quint16 newSampleRate);
+    void setNotchFreq(quint16 newNotchFreq);
 
 signals:
-    void PlotData();
+    void toPlot(QList<QPointF> VoltagePts[32]);
 
 public slots:
     void getRawData(QByteArray datagram);
@@ -23,10 +26,15 @@ protected:
     void run();
     
 private:
-    QList<quint16> VoltageChain[32];
+    QList<QPointF> VoltagePts[32];
 
     quint16 sampleRate;
-    quint16 cutoffFreq;
+    quint16 notchFreq;
+
+    quint16 MaxPts;
+    quint64 timeStamp;
+
+    QElapsedTimer ETimer;
 
 
 };

@@ -13,14 +13,15 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // IP config
+    // read config.ini to get ip address
     QFileInfo iniFileInfo("config.ini"); // init, read .Ini file
     if (iniFileInfo.isFile())
     {
-        QSettings *configIniRead = new QSettings("config.ini", QSettings::IniFormat); //初始化读取Ini文件对象
+        QSettings *configIniRead = new QSettings("config.ini", QSettings::IniFormat);
         ip = configIniRead->value("ip").toString();
         qDebug() << configIniRead->value("ip").toString();
     }
+    // if no such file, create a new one
     else
     {
         QSettings *configIniWrite = new QSettings("config.ini", QSettings::IniFormat);
@@ -29,36 +30,36 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // UDP init
-    mrecv = new QUdpSocket;
     msend = new QUdpSocket;
-    msend->bind(sendPort);     // for normal commend
-    mrecv->bind(sendPort + 2); // for impedance test
+    msend->bind(sendPort);     // for normal commend, 2333
+
+    mrecv = new QUdpSocket;
+    mrecv->bind(sendPort + 2); // for impedance test, 2335
     recvTpye = UdpOther;
 
+    // signal-slot, read data - handle
     connect(msend, &QUdpSocket::readyRead, this, &MainWindow::handleSend);
-
     connect(mrecv, &QUdpSocket::readyRead, this, &MainWindow::handleReceive);
 
+    // set default choice of comvo boxes
     ui->comboBox->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
 
-    plot = new Plot;
-    plot->setTitle("Dynamic Volt display");
-    plot->legend()->hide();
-    plot->setAnimationOptions(QChart::NoAnimation);
-    plot->setContentsMargins(0, 0, 0, 0);
-    plot->setMargins(QMargins(0, 0, 0, 0));
-    plot->setBackgroundRoundness(0);
-
+    // init udpSave
     udp = new udpSave();
 
-    ui->graphicsView->setChart(plot);
-//    ui->graphicsView->setRubberBand(QChartView::RectangleRubberBand);
+    // init Plot object
+    plot = new Plot;
 
-    // connect(plot, &Plot::getPlotData, udp, &udpSave::getPlotData);
+
+    // set plot to graphicsView on panel
+    ui->graphicsView->setChart(plot);
+
+    // signal-slot for real-time plotting
     connect(udp, &udpSave::toProcess, dataprocess, &dataprocess::getRawData);
     connect(dataprocess, &dataprocess::PlotData, Plot, &Plot::);
+    connect()
 }
 
 MainWindow::~MainWindow()
@@ -70,24 +71,32 @@ MainWindow::~MainWindow()
 
 // Udp handle function
 
+/**
+ * @brief handle send command feedback
+ */
 void MainWindow::handleSend()
 {
-    char buf[1024] = {0};
     QHostAddress cli_addr; // client address
     quint16 port;          // client port
+
+    // init buffer
+    char buf[1024] = {0};
     qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
     if (len > 0)
     {
-        QString str = QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
-        qDebug() << str;
+        // print debug data
+        qDebug() <<  QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
+
+        // normal feedback, should be "a"
         if (recvTpye == UdpRead)
         {
             QString reg = "0x" + QString::number((quint8)buf[0], 16);
             qDebug() << reg;
             ui->label_readValue->setText(reg);
         }
-        if (recvTpye == UdpBatt)
+        // Battery voltage feedback
+        else if (recvTpye == UdpBatt)
         {
             QString bat = QString::number(((quint8)buf[0]+(((quint16)buf[1])<<8)) * 2) + "mV";
             qDebug() << bat;
@@ -99,21 +108,26 @@ void MainWindow::handleSend()
     }
 }
 
-// Read data of Impedance test
+/**
+ * @brief Handle Impedance test data
+ */
 void MainWindow::handleReceive()
 {
-    char buf[2048] = {0};
     QHostAddress cli_addr; // Client address
     quint16 port;          // Client port
-    qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+
+    // buffer init
+    char buf[2048] = {0};
+    qint64 len = mrecvIMP->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+
     qDebug() << "Impedance test" << len;
 
-    if (len > 0)
+    if (len > 0)    // get feedback
     {
         if (fileName != "")
         {
             QFile file(fileName);
-            if (!(file.open(QFile::WriteOnly | QIODevice::Append))) // QIODevice::Append
+            if (!(file.open(QFile::WriteOnly | QIODevice::Append)))
             {
                 file.close();
             }
@@ -122,7 +136,7 @@ void MainWindow::handleReceive()
                 QTextStream out(&file);
                 for (int i = 0; i < len / 2; i++)
                 {
-                    out << ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i] << "\n"; // data I want
+                    out << ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i] << "\n";
                     qDebug() << (quint8)buf[2 * i + 1] << (quint8)buf[2 * i];
                 }
                 file.close();
@@ -188,32 +202,49 @@ void MainWindow::on_pushButton_write_clicked()
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
-// Acquisition action setting
-
+/**
+ * @brief handle press run/stop
+ * 
+ */
 void MainWindow::on_pushButton_run_clicked()
 {
     if (ui->pushButton_run->text() == "Press to run")
     {
+        // send "s" to start accquisition process
         QString str = "s";
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+
         if (!udp->isRunning())
         {
+            // Enable udpSave thread, keep receiving data
             udp->term = false;
             udp->start();
+
+            // Enable real-time plotting
             plot->plotTimer.start();
         }
+
+        // switch button state(text)
         ui->pushButton_run->setText("Running, press to stop");
     }
     else
     {
+        // send "s" to start accquisition process
         QString str = "p";
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-        ui->pushButton_run->setText("Press to run");
+
         if (udp->isRunning())
         {
+            // Disable udpSave thread, keep receiving data
             udp->stop();
+
+            // Disable real-time plotting
             plot->plotTimer.stop();
         }
+
+        // switch button state(text)
+        ui->pushButton_run->setText("Press to run");
+
     }
 }
 
