@@ -25,21 +25,24 @@ public:
         
     void getPlotData(quint8 plotData[64]);
 
-    void setTimeRange(quint16 range_ms);
-    void setVoltRange(quint16 range_uv, qint16 center_uv);
+    void setTimeRange(quint16 range_pt);
 
-public slots:
-    void Plotting(QList<QPointF> VoltagePts[32]);
+    void setPlotChannel(quint16 newChannel);
+    quint16 getPlotChannel();
+
+    void Plotting(quint16 pts);
 
 private:
-    QLineSeries *plot_series[32];
+    QLineSeries *plot_series;
 
     QValueAxis *plot_axisX;
     QValueAxis *plot_axisY;
 
-    quint32 plot_time;
+    quint32 x_range = 4000;
+    quint16 y_range;
+
+    quint64 plot_time;
     quint16 plot_channel = 0;
-    quint8 firstByte[32];
 };
 
 #endif // PLOT_H

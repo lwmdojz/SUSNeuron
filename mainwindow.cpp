@@ -31,14 +31,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     // UDP init
     msend = new QUdpSocket;
-    msend->bind(sendPort);     // for normal commend, 2333
+    msend->bind(sendPort);      // for normal commend, 2333
+
+    mshit = new QUdpSocket;
+    mshit->bind(shitPort);      // for shit data, 2334
 
     mrecv = new QUdpSocket;
-    mrecv->bind(sendPort + 2); // for impedance test, 2335
+    mrecv->bind(recvPort);      // for impedance test, 2335
+
     recvTpye = UdpOther;
 
     // signal-slot, read data - handle
     connect(msend, &QUdpSocket::readyRead, this, &MainWindow::handleSend);
+    connect(mshit, &QUdpSocket::readyRead, this, &MainWindow::handleShit);
     connect(mrecv, &QUdpSocket::readyRead, this, &MainWindow::handleReceive);
 
     // set default choice of comvo boxes
@@ -46,26 +51,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
 
-    // init udpSave
-    udp = new udpSave();
-
     // init Plot object
     plot = new Plot;
 
-
     // set plot to graphicsView on panel
     ui->graphicsView->setChart(plot);
-
-    // signal-slot for real-time plotting
-    connect(udp, &udpSave::toProcess, dataprocess, &dataprocess::getRawData);
-    connect(dataprocess, &dataprocess::PlotData, Plot, &Plot::);
-    connect()
+    ui->graphicsView->setRubberBand(QChartView::RectangleRubberBand);
 }
 
 MainWindow::~MainWindow()
 {
-    if (udp->isRunning())
-        udp->stop();
     delete ui;
 }
 
@@ -118,15 +113,15 @@ void MainWindow::handleReceive()
 
     // buffer init
     char buf[2048] = {0};
-    qint64 len = mrecvIMP->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+    qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
     qDebug() << "Impedance test" << len;
 
     if (len > 0)    // get feedback
     {
-        if (fileName != "")
+        if (ImpedanceFileName != "")
         {
-            QFile file(fileName);
+            QFile file(ImpedanceFileName);
             if (!(file.open(QFile::WriteOnly | QIODevice::Append)))
             {
                 file.close();
@@ -138,6 +133,50 @@ void MainWindow::handleReceive()
                 {
                     out << ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i] << "\n";
                     qDebug() << (quint8)buf[2 * i + 1] << (quint8)buf[2 * i];
+                }
+                file.close();
+            }
+        }
+    }
+}
+
+void MainWindow::handleShit()
+{
+    QHostAddress cli_addr; // Client address
+    quint16 port;          // Client port
+
+    // buffer init
+    char buf[2082] = {0};
+    qint32 len = mshit->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+
+    if (len > 0)    // get feedback
+    {
+        if (ShitFileName != "")
+        {
+            QFile file(ShitFileName);
+            if (!(file.open(QFile::WriteOnly | QIODevice::Append)))
+            {
+                file.close();
+            }
+            else
+            {
+                QTextStream out(&file);
+                for (int i = 0; i < len / 2; i++)
+                {
+                    quint16 temp = ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i];
+                    out << temp << ",";
+//                    qDebug() << temp;
+
+                    if (i%32 == plot->getPlotChannel())
+                    {
+                        plot->Plotting(temp);
+                    }
+
+                    if (!i%32)
+                    {
+                        out << "\n";
+                    }
+//                    qDebug() << "plot\n";
                 }
                 file.close();
             }
@@ -214,16 +253,6 @@ void MainWindow::on_pushButton_run_clicked()
         QString str = "s";
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 
-        if (!udp->isRunning())
-        {
-            // Enable udpSave thread, keep receiving data
-            udp->term = false;
-            udp->start();
-
-            // Enable real-time plotting
-            plot->plotTimer.start();
-        }
-
         // switch button state(text)
         ui->pushButton_run->setText("Running, press to stop");
     }
@@ -233,31 +262,20 @@ void MainWindow::on_pushButton_run_clicked()
         QString str = "p";
         msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 
-        if (udp->isRunning())
-        {
-            // Disable udpSave thread, keep receiving data
-            udp->stop();
-
-            // Disable real-time plotting
-            plot->plotTimer.stop();
-        }
-
         // switch button state(text)
         ui->pushButton_run->setText("Press to run");
-
     }
 }
 
 void MainWindow::on_pushButton_savePath_clicked()
 {
-    udp->setFilename(QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.dat)")));
-    QFileInfo fileInfo(udp->getFilename());
+    ShitFileName = QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.dat)"));
+    QFileInfo fileInfo(ShitFileName);
 
     if (fileInfo.isFile())
     {
         fileInfo.dir().remove(fileInfo.fileName());
     }
-    qDebug() << udp->getFilename();
 }
 
 void MainWindow::on_pushButton_getBatt_clicked()
@@ -289,8 +307,8 @@ void MainWindow::on_pushButton_currentset_clicked()
 
 void MainWindow::on_pushButton_impedancetest_clicked()
 {
-    fileName = QFileDialog::getSaveFileName(this, tr("Save file (if file existed, delete and rebuild it"), "", tr("(*.csv)"));
-    QFileInfo fileInfo(fileName);
+    ImpedanceFileName = QFileDialog::getSaveFileName(this, tr("Save file (if file existed, delete and rebuild it"), "", tr("(*.csv)"));
+    QFileInfo fileInfo(ImpedanceFileName);
     if (fileInfo.isFile())
     {
         fileInfo.dir().remove(fileInfo.fileName());

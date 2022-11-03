@@ -5,7 +5,6 @@
 #include <QThread>
 #include<QDebug>
 #include <QUdpSocket>
-#include "udpsave.h"
 #include "plot.h"
 #include <QTimer>
 
@@ -28,7 +27,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     Ui::MainWindow *ui;
-    Plot *plot;
 
 private slots:
 
@@ -57,21 +55,26 @@ private slots:
 
     // Others
     void handleSend();
+    void handleShit();
     void handleReceive();
 
 private:
 
-    QUdpSocket  *mrecvIMP;
+    QUdpSocket  *mrecv;
     QUdpSocket  *msend;
-    udpSave *udp;
+    QUdpSocket  *mshit;
     QString ip;
 
     quint16 sendPort = 2333;
-    quint16 IMPPort = 2335;
+    quint16 shitPort = 2334;
+    quint16 recvPort = 2335;
 
     UdpRecvType recvTpye;
 
-    QString IMPDataFileName = "";
+    QString ImpedanceFileName = "";
+    QString ShitFileName = "";
+
+    Plot *plot;
 
 };
 #endif // MAINWINDOW_H
