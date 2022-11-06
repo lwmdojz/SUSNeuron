@@ -172,11 +172,10 @@ void MainWindow::handleShit()
                         plot->Plotting(temp);
                     }
 
-                    if (!i%32)
+                    if (i%32==0 && i!=0)
                     {
                         out << "\n";
                     }
-//                    qDebug() << "plot\n";
                 }
                 file.close();
             }
@@ -269,7 +268,7 @@ void MainWindow::on_pushButton_run_clicked()
 
 void MainWindow::on_pushButton_savePath_clicked()
 {
-    ShitFileName = QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.dat)"));
+    ShitFileName = QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.csv)"));
     QFileInfo fileInfo(ShitFileName);
 
     if (fileInfo.isFile())
@@ -333,5 +332,8 @@ void MainWindow::on_pushButton_zcount_clicked()
 }
 
 
-
+void MainWindow::on_pushButton_setPlotCh_clicked()
+{
+    plot->setPlotChannel(ui->comboBox_plotCh->currentIndex());
+}
 

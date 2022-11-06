@@ -53,10 +53,14 @@ private slots:
     void on_pushButton_hz_clicked();
     void on_pushButton_zcount_clicked();
 
+    // Plot Setting
+    void on_pushButton_setPlotCh_clicked();
+
     // Others
     void handleSend();
     void handleShit();
     void handleReceive();
+
 
 private:
 

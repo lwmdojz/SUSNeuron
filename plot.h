@@ -38,7 +38,7 @@ private:
     QValueAxis *plot_axisX;
     QValueAxis *plot_axisY;
 
-    quint32 x_range = 4000;
+    quint32 x_range = 2000;
     quint16 y_range;
 
     quint64 plot_time;

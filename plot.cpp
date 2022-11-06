@@ -54,7 +54,7 @@ Plot::~Plot()
 
 void Plot::Plotting(quint16 pts)
 {
-    qreal Volt = (float)pts*5/65535-5;
+    qreal Volt = (float)pts*10.0/65535.0-5.0;
     plot_series->append(plot_time, Volt);
 
     if (plot_time++ == x_range)
