@@ -28,7 +28,6 @@ public:
     ~MainWindow();
     Ui::MainWindow *ui;
     QMainWindow PlotWindow;
-    Plot *plot;
 
 private slots:
 //    void on_pushButton_SamplingPeriod_clicked();

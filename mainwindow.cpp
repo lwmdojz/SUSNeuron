@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "plot.h"
 
 #include <QtCharts/QChartView>
 #include <QtWidgets/QApplication>
@@ -78,11 +77,9 @@ MainWindow::MainWindow(QWidget *parent)
                     QTextStream out(&file);
                     for(int i=0;i<len/2;i++){
                         out<<((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]<<"\n"; // data I want
-                        plot->loadData(i%32, ((quint16)((quint8)buf[2*i+1])<<8)+(quint8)buf[2*i]);
                         qDebug()<<(quint8)buf[2*i+1]<<(quint8)buf[2*i];
                     }
                     file.close();
-                    plot->nextPt();
                 }
             }
         } 
@@ -93,7 +90,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->comboBox->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
-    plot = new Plot;
 }
 
 MainWindow::~MainWindow()
@@ -160,8 +156,6 @@ void MainWindow::on_pushButton_run_clicked()
             udp->start();
         }
         ui->pushButton_run->setText("Running, press to stop");
-        
-        PlotWindow.show();
     }
     else
     {
