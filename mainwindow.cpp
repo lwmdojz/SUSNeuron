@@ -161,7 +161,7 @@ void MainWindow::handleShit()
             else
             {
                 QTextStream out(&file);
-                for (int i = 0; i < len / 2; i++)
+                for (int i = 2; i < len / 2; i++)
                 {
                     quint16 temp = ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i];
                     out << temp << ",";

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>763</width>
-    <height>860</height>
+    <height>898</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -67,6 +67,9 @@
              <property name="maximum">
               <number>15</number>
              </property>
+             <property name="value">
+              <number>6</number>
+             </property>
             </widget>
            </item>
           </layout>
@@ -77,6 +80,12 @@
             <widget class="QCheckBox" name="checkBox_DSPOnoff">
              <property name="text">
               <string>DSP Switch</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="tristate">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
