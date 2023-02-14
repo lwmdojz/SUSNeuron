@@ -397,7 +397,11 @@
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="spinBox_writeData"/>
+            <widget class="QSpinBox" name="spinBox_writeData">
+             <property name="maximum">
+              <number>255</number>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_write">
