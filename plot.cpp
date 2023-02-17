@@ -34,7 +34,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
     plot_axisX->setTickCount(5);
     plot_axisX->setMinorTickCount(1);
 
-    plot_axisY->setRange(-5, 5);
+    plot_axisY->setRange(0, 65535);
     plot_axisY->setTickCount(5);
 
     // settings for a better look

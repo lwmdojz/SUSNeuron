@@ -146,7 +146,7 @@ void MainWindow::handleShit()
     quint16 port;          // Client port
 
     // buffer init
-    char buf[2082] = {0};
+    char buf[2084] = {0};
     qint32 len = mshit->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
     if (len > 0)    // get feedback
@@ -161,13 +161,13 @@ void MainWindow::handleShit()
             else
             {
                 QTextStream out(&file);
-                for (int i = 2; i < len / 2; i++)
+                for (int i = 1; i < len / 2; i++)
                 {
                     quint16 temp = ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i];
                     out << temp << ",";
 //                    qDebug() << temp;
 
-                    if (i%32 == plot->getPlotChannel())
+                    if (i%32-1 == plot->getPlotChannel())
                     {
                         plot->Plotting(temp);
                     }

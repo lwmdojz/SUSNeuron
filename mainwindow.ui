@@ -327,6 +327,13 @@
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_ShowPlot">
+             <property name="text">
+              <string>Show Plot</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
