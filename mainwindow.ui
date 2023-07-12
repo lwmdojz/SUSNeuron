@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>763</width>
-    <height>898</height>
+    <width>1286</width>
+    <height>870</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,10 +21,23 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="1" rowspan="4">
+     <widget class="QChartView" name="graphicsView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
      <widget class="QGroupBox" name="groupBox_2">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="title">
-       <string>Sample rate and DSP</string>
+       <string>RHD2132 Parameter Setting</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
        <item>
@@ -54,14 +67,238 @@
           </layout>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <widget class="QLabel" name="label_5">
+            <widget class="QLabel" name="label">
              <property name="text">
-              <string>DSP Cutoff</string>
+              <string>Upper Cutoff:</string>
              </property>
             </widget>
            </item>
+           <item>
+            <widget class="QComboBox" name="comboBox_UpperCutoff">
+             <item>
+              <property name="text">
+               <string>20 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>15 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>7.5 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>5 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>3 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2.5 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1.5 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1 kHz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>750 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>500 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>300 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>200 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100 Hz</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Lower Cutoff:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboBox_LowerCutoff">
+             <item>
+              <property name="text">
+               <string>500 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>300 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>250 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>200 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>150 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>100 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>75 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>30 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>25 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>20 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>15 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>7.5 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>5 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>3 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2.5 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>2 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1.5 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.75 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.5 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.3 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.25 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>0.1 Hz</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
             <widget class="QSpinBox" name="spinBox_DSPCutoff">
              <property name="maximum">
@@ -72,10 +309,16 @@
              </property>
             </widget>
            </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <item>
+            <widget class="QComboBox" name="comboBox_DSPCutoff"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>DSP Cutoff</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QCheckBox" name="checkBox_DSPOnoff">
              <property name="text">
@@ -89,10 +332,28 @@
              </property>
             </widget>
            </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
-            <widget class="QPushButton" name="pushButton_SampleDSP">
+            <widget class="QPushButton" name="pushButton_calibrate">
              <property name="text">
-              <string>Set</string>
+              <string>Calibrate</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_clear">
+             <property name="text">
+              <string>Clear Calibration</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_SetParam">
+             <property name="text">
+              <string>Set Parameters</string>
              </property>
             </widget>
            </item>
@@ -103,10 +364,10 @@
       </layout>
      </widget>
     </item>
-    <item row="3" column="0">
+    <item row="2" column="0">
      <widget class="QGroupBox" name="groupBox_5">
       <property name="title">
-       <string>System and data</string>
+       <string>System and Data</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_13">
        <item>
@@ -341,7 +602,125 @@
       </layout>
      </widget>
     </item>
-    <item row="2" column="0">
+    <item row="3" column="0">
+     <widget class="QGroupBox" name="groupBox_7">
+      <property name="title">
+       <string>阻抗测试</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_16">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_15">
+           <item>
+            <widget class="QSpinBox" name="spinBox_zcount">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+             <property name="value">
+              <number>10</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_zcount">
+             <property name="text">
+              <string>周期数</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_17">
+           <item>
+            <widget class="QSpinBox" name="spinBox_ch"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_channelset">
+             <property name="text">
+              <string>通道设置</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_18">
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_hz">
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="minimum">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>10000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>1000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_hz">
+             <property name="text">
+              <string>频率设置</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_19">
+           <item>
+            <widget class="QComboBox" name="comboBox_capacitor">
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>0.1 pF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1 pF</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10pF</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_currentset">
+             <property name="text">
+              <string>电容设置</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_impedancetest">
+         <property name="text">
+          <string>Run test</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="0">
      <widget class="QGroupBox" name="groupBox_3">
       <property name="title">
        <string>Register Operation</string>
@@ -424,407 +803,6 @@
       </layout>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>Filter</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_9">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Upper Cutoff:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox_UpperCutoff">
-             <item>
-              <property name="text">
-               <string>20 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>15 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>10 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>7.5 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>5 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>3 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2.5 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1.5 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1 kHz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>750 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>500 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>300 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>250 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>200 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>100 Hz</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Lower Cutoff:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox_LowerCutoff">
-             <item>
-              <property name="text">
-               <string>500 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>300 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>250 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>200 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>150 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>100 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>75 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>50 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>30 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>25 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>20 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>15 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>10 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>7.5 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>5 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>3 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2.5 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1.5 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>0.75 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>0.5 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>0.3 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>0.25 Hz</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>0.1 Hz</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_5">
-           <item>
-            <widget class="QPushButton" name="pushButton_Bandwidth">
-             <property name="text">
-              <string>Set parameter</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_calibrate">
-             <property name="text">
-              <string>Calibrate</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_clear">
-             <property name="text">
-              <string>Clear calibrate</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QGroupBox" name="groupBox_7">
-      <property name="title">
-       <string>阻抗测试</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_16">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_15">
-           <item>
-            <widget class="QSpinBox" name="spinBox_zcount">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>20</number>
-             </property>
-             <property name="value">
-              <number>10</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_zcount">
-             <property name="text">
-              <string>周期数</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_17">
-           <item>
-            <widget class="QSpinBox" name="spinBox_ch"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_channelset">
-             <property name="text">
-              <string>通道设置</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_18">
-           <item>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_hz">
-             <property name="decimals">
-              <number>1</number>
-             </property>
-             <property name="minimum">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>10000.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>1000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_hz">
-             <property name="text">
-              <string>频率设置</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_19">
-           <item>
-            <widget class="QComboBox" name="comboBox">
-             <property name="currentIndex">
-              <number>0</number>
-             </property>
-             <item>
-              <property name="text">
-               <string>0.1 pF</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1 pF</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>10pF</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_currentset">
-             <property name="text">
-              <string>电容设置</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_impedancetest">
-         <property name="text">
-          <string>Run test</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="0" column="1" rowspan="5">
-     <widget class="QChartView" name="graphicsView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -832,7 +810,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>763</width>
+     <width>1286</width>
      <height>25</height>
     </rect>
    </property>

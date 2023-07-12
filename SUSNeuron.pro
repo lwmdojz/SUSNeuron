@@ -1,9 +1,10 @@
-QT       += core gui
-QT       += charts
+QT      += core gui
+QT      += charts
+QT      += bluetooth
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-QT       += network printsupport
-CONFIG += c++17
+QT      += network printsupport
+CONFIG  += c++17
 
 # large memory set
 QMAKE_LFLAGS_WINDOWS += -Wl,--stack,32000000

@@ -8,6 +8,15 @@
 #include <QSettings>
 #include <QtCore>
 
+//#include <QBluetoothDeviceDiscoveryAgent>
+//#include <OBluetoothUuid>
+//#include <OBluetoothDeviceInfo>
+//#include <QLowEnergyController>
+//#include <QLowEnergyDescriptor>
+//#include <QLowEnergyService>
+//#include <QLowEnergyCharacteristic>
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -47,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mrecv, &QUdpSocket::readyRead, this, &MainWindow::handleReceive);
 
     // set default choice of comvo boxes
-    ui->comboBox->setCurrentIndex(2);
+    ui->comboBox_capacitor->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
 
@@ -57,6 +66,9 @@ MainWindow::MainWindow(QWidget *parent)
     // set plot to graphicsView on panel
     ui->graphicsView->setChart(plot);
     ui->graphicsView->setRubberBand(QChartView::RectangleRubberBand);
+
+    // To Do: IP Search
+
 }
 
 MainWindow::~MainWindow()
@@ -165,7 +177,6 @@ void MainWindow::handleShit()
                 {
                     quint16 temp = ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i];
                     out << temp << ",";
-//                    qDebug() << temp;
 
                     if (i%32-1 == plot->getPlotChannel())
                     {
@@ -186,13 +197,13 @@ void MainWindow::handleShit()
 
 // Acquisition parameter setting
 
-void MainWindow::on_pushButton_SampleDSP_clicked()
+void MainWindow::on_pushButton_SetParam_clicked()
 {
-    QString MyData = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
-    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
+    QString ParamCmd = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
+    msend->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip), sendPort);
 
-    MyData = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
-    msend->writeDatagram(MyData.toUtf8(), QHostAddress(ip), sendPort);
+    ParamCmd = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
+    msend->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip), sendPort);
 
     QString str = "d";
     if (ui->checkBox_DSPOnoff->checkState() == Qt::Checked)
@@ -204,13 +215,11 @@ void MainWindow::on_pushButton_SampleDSP_clicked()
         str += '0';
     }
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-}
 
-void MainWindow::on_pushButton_Bandwidth_clicked()
-{
-    QString str = "f" + QString::number(ui->comboBox_UpperCutoff->currentIndex()) + " " + QString::number(ui->comboBox_LowerCutoff->currentIndex());
+    ParamCmd = "f" + QString::number(ui->comboBox_UpperCutoff->currentIndex()) + " " + QString::number(ui->comboBox_LowerCutoff->currentIndex());
     msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
+
 
 void MainWindow::on_pushButton_calibrate_clicked()
 {
