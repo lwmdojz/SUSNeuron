@@ -8,13 +8,6 @@
 #include <QSettings>
 #include <QtCore>
 
-//#include <QBluetoothDeviceDiscoveryAgent>
-//#include <OBluetoothUuid>
-//#include <OBluetoothDeviceInfo>
-//#include <QLowEnergyController>
-//#include <QLowEnergyDescriptor>
-//#include <QLowEnergyService>
-//#include <QLowEnergyCharacteristic>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -39,26 +32,31 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // UDP init
-    msend = new QUdpSocket;
-    msend->bind(sendPort);      // for normal commend, 2333
+    m_cmd = new QUdpSocket;
+    m_cmd->bind(sendPort);      // for normal commend, 2333
 
-    mshit = new QUdpSocket;
-    mshit->bind(shitPort);      // for shit data, 2334
+    m_sig = new QUdpSocket;
+    m_sig->bind(shitPort);      // for shit data, 2334
 
-    mrecv = new QUdpSocket;
-    mrecv->bind(recvPort);      // for impedance test, 2335
+    m_imp = new QUdpSocket;
+    m_imp->bind(recvPort);      // for impedance test, 2335
 
     recvTpye = UdpOther;
 
     // signal-slot, read data - handle
-    connect(msend, &QUdpSocket::readyRead, this, &MainWindow::handleSend);
-    connect(mshit, &QUdpSocket::readyRead, this, &MainWindow::handleShit);
-    connect(mrecv, &QUdpSocket::readyRead, this, &MainWindow::handleReceive);
+    connect(m_cmd, &QUdpSocket::readyRead, this, &MainWindow::handleCommand);
+    connect(m_sig, &QUdpSocket::readyRead, this, &MainWindow::handleElecSig);
+    connect(m_imp, &QUdpSocket::readyRead, this, &MainWindow::handleImpedance);
 
     // set default choice of comvo boxes
     ui->comboBox_capacitor->setCurrentIndex(2);
     ui->comboBox_UpperCutoff->setCurrentIndex(3);
     ui->comboBox_LowerCutoff->setCurrentIndex(24);
+    for (int i = 1; i < 16; i++)
+    {
+        ui->comboBox_DSPCutoff->setItemText(i, QString::number(ui->spinBox_SamplingPeriod->value() * kFreq[i-1], 'g', 10) + " Hz");
+    }
+    ui->comboBox_DSPCutoff->setCurrentIndex(6);
 
     // init Plot object
     plot = new Plot;
@@ -68,7 +66,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphicsView->setRubberBand(QChartView::RectangleRubberBand);
 
     // To Do: IP Search
+//    for (quint16 i = 0; i < 256; i++)
+//    {
+//        recvTpye = UdpBatt;
+//        QString str = "b";
+//        m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 
+//    }
 }
 
 MainWindow::~MainWindow()
@@ -81,14 +85,14 @@ MainWindow::~MainWindow()
 /**
  * @brief handle send command feedback
  */
-void MainWindow::handleSend()
+void MainWindow::handleCommand()
 {
     QHostAddress cli_addr; // client address
     quint16 port;          // client port
 
     // init buffer
     char buf[1024] = {0};
-    qint64 len = msend->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+    qint64 len = m_cmd->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
     if (len > 0)
     {
@@ -111,21 +115,21 @@ void MainWindow::handleSend()
         }
         recvTpye = UdpOther;
 
-        ui->statusbar->showMessage(tr("Responsed!"), 1000);
+        ui->statusbar->showMessage(tr("Responsed!"), 1500);
     }
 }
 
 /**
  * @brief Handle Impedance test data
  */
-void MainWindow::handleReceive()
+void MainWindow::handleImpedance()
 {
     QHostAddress cli_addr; // Client address
     quint16 port;          // Client port
 
     // buffer init
     char buf[2048] = {0};
-    qint64 len = mrecv->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+    qint64 len = m_imp->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
     qDebug() << "Impedance test" << len;
 
@@ -152,14 +156,14 @@ void MainWindow::handleReceive()
     }
 }
 
-void MainWindow::handleShit()
+void MainWindow::handleElecSig()
 {
     QHostAddress cli_addr; // Client address
     quint16 port;          // Client port
 
     // buffer init
     char buf[2084] = {0};
-    qint32 len = mshit->readDatagram(buf, sizeof(buf), &cli_addr, &port);
+    qint32 len = m_sig->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
     if (len > 0)    // get feedback
     {
@@ -195,15 +199,17 @@ void MainWindow::handleShit()
 }
 
 
+//void MainWindow::BLE
+
 // Acquisition parameter setting
 
 void MainWindow::on_pushButton_SetParam_clicked()
 {
     QString ParamCmd = "m" + QString::number(ui->spinBox_SamplingPeriod->value(), 10);
-    msend->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip), sendPort);
 
-    ParamCmd = "u" + QString::number(ui->spinBox_DSPCutoff->value(), 10);
-    msend->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip), sendPort);
+    ParamCmd = "u" + QString::number(ui->comboBox_DSPCutoff->currentIndex(), 10);
+    m_cmd->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip), sendPort);
 
     QString str = "d";
     if (ui->checkBox_DSPOnoff->checkState() == Qt::Checked)
@@ -214,23 +220,22 @@ void MainWindow::on_pushButton_SetParam_clicked()
     {
         str += '0';
     }
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 
     ParamCmd = "f" + QString::number(ui->comboBox_UpperCutoff->currentIndex()) + " " + QString::number(ui->comboBox_LowerCutoff->currentIndex());
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
-
 
 void MainWindow::on_pushButton_calibrate_clicked()
 {
     QString str = "a";
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 void MainWindow::on_pushButton_clear_clicked()
 {
     QString str = "c";
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 // Register setting
@@ -239,15 +244,16 @@ void MainWindow::on_pushButton_read_clicked()
 {
     recvTpye = UdpRead;
     QString str = "r" + QString::number(ui->spinBox_ReadAddr->value(), 10);
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 void MainWindow::on_pushButton_write_clicked()
 {
     recvTpye = UdpRead;
     QString str = "w" + QString::number(ui->spinBox_writeAddr->value(), 10) + QString::number(ui->spinBox_writeData->value(), 10);
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
+
 
 /**
  * @brief handle press run/stop
@@ -259,7 +265,7 @@ void MainWindow::on_pushButton_run_clicked()
     {
         // send "s" to start accquisition process
         QString str = "s";
-        msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+        m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 
         // switch button state(text)
         ui->pushButton_run->setText("Running, press to stop");
@@ -268,7 +274,7 @@ void MainWindow::on_pushButton_run_clicked()
     {
         // send "s" to start accquisition process
         QString str = "p";
-        msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+        m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 
         // switch button state(text)
         ui->pushButton_run->setText("Press to run");
@@ -290,13 +296,13 @@ void MainWindow::on_pushButton_getBatt_clicked()
 {
     recvTpye = UdpBatt;
     QString str = "b";
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 void MainWindow::on_pushButton_shutdown_clicked()
 {
     QString str = "o";
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 // Impedance measurement setting
@@ -304,13 +310,13 @@ void MainWindow::on_pushButton_shutdown_clicked()
 void MainWindow::on_pushButton_channelset_clicked()
 {
     QString str = "h" + QString::number(ui->spinBox_ch->value(), 10);
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 void MainWindow::on_pushButton_currentset_clicked()
 {
-    QString str = "i" + QString::number(ui->comboBox->currentIndex(), 10);
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+//    QString str = "i" + QString::number(ui->comboBox_->currentIndex(), 10);
+//    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 void MainWindow::on_pushButton_impedancetest_clicked()
@@ -322,7 +328,7 @@ void MainWindow::on_pushButton_impedancetest_clicked()
         fileInfo.dir().remove(fileInfo.fileName());
     }
     QString str = "z";
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 void MainWindow::on_pushButton_hz_clicked()
@@ -331,18 +337,25 @@ void MainWindow::on_pushButton_hz_clicked()
     double a = ui->doubleSpinBox_hz->value();
     int b = a * 10;
     QString str = "g" + QString::number(b, 10);
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
 void MainWindow::on_pushButton_zcount_clicked()
 {
     QString str = "j" + QString::number(ui->spinBox_zcount->value(), 10);
-    msend->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
-
 
 void MainWindow::on_pushButton_setPlotCh_clicked()
 {
     plot->setPlotChannel(ui->comboBox_plotCh->currentIndex());
+}
+
+void MainWindow::on_spinBox_SamplingPeriod_valueChanged(int sampleRate)
+{
+    for (int i = 1; i < 16; i++)
+    {
+        ui->comboBox_DSPCutoff->setItemText(i, QString::number(sampleRate*kFreq[i-1], 'g', 10) + " Hz");
+    }
 }
 
