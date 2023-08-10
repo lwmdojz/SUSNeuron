@@ -53,6 +53,7 @@ BLEX_EXPORT size_t    blexAdapterGetPairedPeripheralsCount(BlexAdapter handle);
 BLEX_EXPORT BlexPeripheral blexAdapterGetPairedPeripheralsHandle(BlexAdapter handle,
                                                           size_t index);
 
+// register when start
 BLEX_EXPORT BlexErrorCode blexAdapterSetCallbackOnScanStart(
       BlexAdapter handle,
       void (*callback)(BlexAdapter adapter, void* userdata),

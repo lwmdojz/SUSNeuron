@@ -8,13 +8,27 @@ BLE_IMP::BLE_IMP()
     else
         qDebug() << "libblex.dll load failed";
 
-    // typedef int (*FunDef)(void);
-    // FunDef blexAdapterGetHandle = (FunDef) libblex->resolve("blexAdapterGetHandle");
+    size_t size = 1;
 
-    // typedef int (*FuncDef)(int);
-    // FuncDef blexAdapterScanStart = (FuncDef) libblex->resolve("blexAdapterScanStart");
+    typedef BlexAdapter (*FunDef)(size_t);
+    FunDef blexAdapterGetHandle = (FunDef) libblex->resolve("blexAdapterGetHandle");
 
-    // qDebug() << "blexAdapterStartStatus: " << blexAdapterScanStart(blexAdapterGetHandle());
+    typedef void (*callback)(void);
+
+    typedef BlexErrorCode (*FuncDef)(BlexAdapter, callback, int*);
+    FuncDef blexAdapterSetCallbackOnScanStart = (FuncDef) libblex->resolve("blexAdapterSetCallbackOnScanStart");
+
+    if (SIMPLEBLE_SUCCESS == blexAdapterSetCallbackOnScanStart(blexAdapterGetHandle(size), callbackOnScanStart, NULL) )
+    {
+        qDebug() << "blexAdapterSetCallbackOnScanStart success";
+    }
+    
+    
+}
+
+void BLE_IMP::callbackOnScanStart(void)
+{
+    // do what?
 }
 
 BLE_IMP::~BLE_IMP() {}
