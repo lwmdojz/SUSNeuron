@@ -21,7 +21,14 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
 
     plot_series = new QLineSeries(this);
     plot_series->setPen(green);
-    plot_series->useOpenGL();
+//    plot_series->useOpenGL();
+
+    plot_axisX->setRange(0, x_range);  // fix range
+    plot_axisX->setTickCount(5);
+    plot_axisX->setMinorTickCount(1);
+
+    plot_axisY->setRange(-6000, 6000);
+    plot_axisY->setTickCount(5);
 
     addSeries(plot_series);
     plot_series->attachAxis(plot_axisX);
@@ -30,12 +37,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
 
     setTitle("Volt");
 
-    plot_axisX->setRange(0, x_range);  // fix range
-    plot_axisX->setTickCount(5);
-    plot_axisX->setMinorTickCount(1);
-
-    plot_axisY->setRange(0, 65535);
-    plot_axisY->setTickCount(5);
+    plot_status = true;
 
     // settings for a better look
     setTitle("Dynamic Volt display");
@@ -44,7 +46,6 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
     setContentsMargins(0, 0, 0, 0);
     setMargins(QMargins(0, 0, 0, 0));
     setBackgroundRoundness(0);
-
 }
 
 Plot::~Plot()
@@ -52,17 +53,42 @@ Plot::~Plot()
 
 }
 
-void Plot::Plotting(quint16 pts)
+void Plot::Plotting(quint16* pts, quint16 length)
 {
-    qreal Volt = pts;
-    plot_series->append(plot_time, Volt);
-
-    if (plot_time++ == x_range)
+    removeSeries(plot_series);
+    for (int i = plot_channel; i < length; i+=32)
     {
-        plot_series->clear();
-        plot_time = 0;
-    }
 
+        qreal Volt = (pts[i]-32768)*0.195;     // mV
+        plot_series->append(plot_time, Volt);
+
+//        if (plot_time > x_range)
+//        {
+//            plot_series->remove(0, plot_time-x_range);
+//            plot_time = x_range;
+//        }
+    }
+    addSeries(plot_series);
+}
+
+bool Plot::getPlot_status() const
+{
+    return plot_status;
+}
+
+void Plot::setPlot_status(bool newPlot_status)
+{
+    if (newPlot_status == false)
+    {
+        removeSeries(plot_series);
+    }
+    plot_status = newPlot_status;
+}
+
+void Plot::setPlot_rate(quint32 newPlot_rate)
+{
+    plot_rate = newPlot_rate;
+    x_range = 2 * newPlot_rate;
 }
 
 void Plot::setTimeRange(quint16 range_pt)

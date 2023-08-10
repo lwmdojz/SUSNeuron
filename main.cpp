@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
     MainWindow ControlWindow;
 
     ControlWindow.resize(1080, 600);
+    ControlWindow.setWindowTitle(QString("SUSNeuron"));
     ControlWindow.show();
     return a.exec();
 }

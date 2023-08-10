@@ -21,23 +21,18 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1" rowspan="4">
-     <widget class="QChartView" name="graphicsView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
+    <item row="2" column="0">
      <widget class="QGroupBox" name="groupBox_2">
       <property name="enabled">
        <bool>true</bool>
       </property>
+      <property name="font">
+       <font>
+        <family>微软雅黑</family>
+       </font>
+      </property>
       <property name="title">
-       <string>RHD2132 Parameter Setting</string>
+       <string>电生理参数设置</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
        <item>
@@ -46,13 +41,18 @@
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
             <widget class="QLabel" name="label_3">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Sample rate</string>
+              <string>采样率：</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="spinBox_SamplingPeriod">
+            <widget class="QSpinBox" name="spinBox_SamplingRate">
              <property name="minimum">
               <number>1</number>
              </property>
@@ -70,13 +70,23 @@
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QLabel" name="label_2">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Lower Cutoff:</string>
+              <string>下限截止频率：</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QComboBox" name="comboBox_LowerCutoff">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <item>
               <property name="text">
                <string>500 Hz</string>
@@ -206,13 +216,23 @@
            </item>
            <item>
             <widget class="QLabel" name="label">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Upper Cutoff:</string>
+              <string>上限截止频率：</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QComboBox" name="comboBox_UpperCutoff">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <item>
               <property name="text">
                <string>20 kHz</string>
@@ -300,7 +320,19 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <item>
-            <widget class="QComboBox" name="comboBox_DSPCutoff">
+            <widget class="QLabel" name="label_5">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
+             <property name="text">
+              <string>高通DSP下限频率：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboBox_DSP">
              <item>
               <property name="text">
                <string>Differentiator</string>
@@ -379,16 +411,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>DSP Cutoff</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="checkBox_DSPOnoff">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>DSP Switch</string>
+              <string>DSP 开关</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -404,22 +434,37 @@
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QPushButton" name="pushButton_calibrate">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Calibrate</string>
+              <string>输入校准</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_clear">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Clear Calibration</string>
+              <string>清除校准</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_SetParam">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Set Parameters</string>
+              <string>应用参数</string>
              </property>
             </widget>
            </item>
@@ -430,34 +475,73 @@
       </layout>
      </widget>
     </item>
-    <item row="2" column="0">
+    <item row="1" column="0">
      <widget class="QGroupBox" name="groupBox_5">
+      <property name="font">
+       <font>
+        <family>微软雅黑</family>
+       </font>
+      </property>
       <property name="title">
-       <string>System and Data</string>
+       <string>系统与数据</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_13">
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QPushButton" name="pushButton_searchIP">
+             <property name="text">
+              <string>搜索局域网设备</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_status">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>设备状态：未连接</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_11">
            <item>
             <widget class="QPushButton" name="pushButton_getBatt">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Get bettary </string>
+              <string>电池电量</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_batt">
              <property name="text">
-              <string>0mV</string>
+              <string>0 mV</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_shutdown">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Shutdown</string>
+              <string>远程关机</string>
              </property>
             </widget>
            </item>
@@ -467,15 +551,25 @@
           <layout class="QHBoxLayout" name="horizontalLayout_14">
            <item>
             <widget class="QPushButton" name="pushButton_savePath">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Save path</string>
+              <string>保存路径</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_run">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Press to run</string>
+              <string>开始采集</string>
              </property>
             </widget>
            </item>
@@ -484,180 +578,193 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_21">
            <item>
-            <widget class="QComboBox" name="comboBox_plotCh">
+            <widget class="QComboBox" name="comboBox_plotChannel">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <item>
               <property name="text">
-               <string>Channel 0</string>
+               <string>通道 0</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 1</string>
+               <string>通道 1</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 2</string>
+               <string>通道 2</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 3</string>
+               <string>通道 3</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 4</string>
+               <string>通道 4</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 5</string>
+               <string>通道 5</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 6</string>
+               <string>通道 6</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 7</string>
+               <string>通道 7</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 8</string>
+               <string>通道 8</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 9</string>
+               <string>通道 9</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 10</string>
+               <string>通道 10</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 11</string>
+               <string>通道 11</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 12</string>
+               <string>通道 12</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 13</string>
+               <string>通道 13</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 14</string>
+               <string>通道 14</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 15</string>
+               <string>通道 15</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 16</string>
+               <string>通道 16</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 17</string>
+               <string>通道 17</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 18</string>
+               <string>通道 18</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 19</string>
+               <string>通道 19</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 20</string>
+               <string>通道 20</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 21</string>
+               <string>通道 21</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 22</string>
+               <string>通道 22</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 23</string>
+               <string>通道 23</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 24</string>
+               <string>通道 24</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 25</string>
+               <string>通道 25</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 26</string>
+               <string>通道 26</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 27</string>
+               <string>通道 27</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 28</string>
+               <string>通道 28</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 29</string>
+               <string>通道 29</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 30</string>
+               <string>通道 30</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Channel 31</string>
+               <string>通道 31</string>
               </property>
              </item>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_setPlotCh">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
              <property name="text">
-              <string>Set Plot Channel</string>
+              <string>设置波形显示通道</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_plotOnOff">
+            <widget class="QCheckBox" name="checkBox_plot">
              <property name="text">
-              <string>Plot Status: Yes</string>
+              <string>实时显示开关</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -670,8 +777,13 @@
     </item>
     <item row="3" column="0">
      <widget class="QGroupBox" name="groupBox_7">
+      <property name="font">
+       <font>
+        <family>微软雅黑</family>
+       </font>
+      </property>
       <property name="title">
-       <string>Impedance</string>
+       <string>阻抗参数设置</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_16">
        <item>
@@ -679,22 +791,50 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_15">
            <item>
-            <widget class="QSpinBox" name="spinBox_zcount">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>20</number>
-             </property>
-             <property name="value">
-              <number>10</number>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>起始频率：</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_zcount">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_startFreq"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_6">
              <property name="text">
-              <string>周期数</string>
+              <string>结束频率：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_stopFreq"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_18">
+           <item>
+            <widget class="QLabel" name="label_7">
+             <property name="text">
+              <string>激励幅值：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_amplitude"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_applyPara">
+             <property name="text">
+              <string>应用参数</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_switchMode">
+             <property name="text">
+              <string>阻抗测量模式</string>
              </property>
             </widget>
            </item>
@@ -703,39 +843,30 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_17">
            <item>
-            <widget class="QSpinBox" name="spinBox_ch"/>
+            <widget class="QPushButton" name="pushButton">
+             <property name="text">
+              <string>搜索设备</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboBox_IMPChannel">
+             <item>
+              <property name="text">
+               <string>通道 1</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>通道 2</string>
+              </property>
+             </item>
+            </widget>
            </item>
            <item>
             <widget class="QPushButton" name="pushButton_channelset">
              <property name="text">
-              <string>通道设置</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_18">
-           <item>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_hz">
-             <property name="decimals">
-              <number>1</number>
-             </property>
-             <property name="minimum">
-              <double>0.100000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>10000.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>1000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_hz">
-             <property name="text">
-              <string>频率设置</string>
+              <string>设置阻抗通道</string>
              </property>
             </widget>
            </item>
@@ -744,129 +875,37 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_19">
            <item>
-            <widget class="QComboBox" name="comboBox_capacitor">
-             <property name="currentIndex">
-              <number>0</number>
+            <widget class="QLabel" name="label_8">
+             <property name="text">
+              <string>波形发生器频率：</string>
              </property>
-             <item>
-              <property name="text">
-               <string>0.1 pF</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1 pF</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>10pF</string>
-              </property>
-             </item>
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_currentset">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_WGFreq"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_startIMP">
              <property name="text">
-              <string>电容设置</string>
+              <string>开始测试</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButton_impedancetest">
-         <property name="text">
-          <string>Run test</string>
-         </property>
-        </widget>
        </item>
       </layout>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QGroupBox" name="groupBox_3">
-      <property name="title">
-       <string>Register Operation</string>
+    <item row="1" column="1" rowspan="3">
+     <widget class="QChartView" name="graphicsView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_10">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>Read address</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="spinBox_ReadAddr"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>Data:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_readValue">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_read">
-             <property name="text">
-              <string>Read Value</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_12">
-           <item>
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>Write address</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="spinBox_writeAddr"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Data:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="spinBox_writeData">
-             <property name="maximum">
-              <number>255</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_write">
-             <property name="text">
-              <string>Write Value</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </item>
-      </layout>
      </widget>
     </item>
    </layout>
@@ -887,14 +926,7 @@
     <addaction name="actionImpedance"/>
     <addaction name="actionDebug"/>
    </widget>
-   <widget class="QMenu" name="menuDevice">
-    <property name="title">
-     <string>Device</string>
-    </property>
-    <addaction name="actionBluetooth"/>
-   </widget>
    <addaction name="menuWindows"/>
-   <addaction name="menuDevice"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionImpedance">

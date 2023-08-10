@@ -30,7 +30,13 @@ public:
     void setPlotChannel(quint16 newChannel);
     quint16 getPlotChannel();
 
-    void Plotting(quint16 pts);
+    void Plotting(quint16* pts, quint16 length);
+
+    bool getPlot_status() const;
+
+    void setPlot_status(bool newPlot_status);
+
+    void setPlot_rate(quint32 newPlot_rate);
 
 private:
     QLineSeries *plot_series;
@@ -42,7 +48,10 @@ private:
     quint16 y_range;
 
     quint64 plot_time;
+    quint32 plot_rate;
     quint16 plot_channel = 0;
+
+    bool plot_status;
 };
 
 #endif // PLOT_H

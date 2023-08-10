@@ -14,15 +14,20 @@ QMAKE_LFLAGS_WINDOWS += -Wl,--stack,32000000
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ble_imp.cpp \
+    debugwindow.cpp \
     main.cpp \
     mainwindow.cpp \
     plot.cpp
 
 HEADERS += \
+    ble_imp.h \
+    debugwindow.h \
     mainwindow.h \
     plot.h \
 
 FORMS += \
+    debugwindow.ui \
     mainwindow.ui
 
 TRANSLATIONS += \
