@@ -78,7 +78,7 @@ BLEX_EXPORT BlexErrorCode blexAdapterSetCallbackOnScanFound(
     void* userdata);
 
 // peripheral.h
-
+/****** get peripheral information *******/
 BLEX_EXPORT void blexPeripheralReleaseHandle(BlexPeripheral handle);
 
 BLEX_EXPORT char* blexPeripheralIdentifier(BlexPeripheral handle);

@@ -6,7 +6,7 @@
 #include<QDebug>
 #include <QUdpSocket>
 #include "plot.h"
-#include "ble_imp.h"
+#include "ble_finder.h"
 #include "debugwindow.h"
 #include <QTimer>
 
@@ -71,6 +71,8 @@ private slots:
     void on_checkBox_plot_stateChanged(int arg1);
 
 
+    void on_pushButton_searchBLE_clicked();
+
 private:
 
     QUdpSocket  *m_imp;
@@ -90,7 +92,7 @@ private:
     QString ShitFileName = "testElec.csv";
 
     Plot *plot;
-    BLE_IMP *ble_imp;
+    BLE_Finder *ble_finder;
     DebugWindow *debugWindow;
 
 

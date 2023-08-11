@@ -1,26 +1,10 @@
-#ifndef BLE_IMP_H
-#define BLE_IMP_H
+#ifndef BLE_FINDER_H
+#define BLE_FINDER_H
 
 #include <QLibrary>
-#include <QtCore>
-
-class BLE_IMP
-{
-public:
-    BLE_IMP();
-    ~BLE_IMP();
-
-    bool isBluetoothEnabled();
-    void callbackOnScanStart();
-    
-private:
-    QLibrary* libblex;
-
-
-};
-
-#endif // BLE_IMP_H
-
+#include <QWidget>
+#include <QTCore>
+#include "ble_finder.h"
 
 #define SIMPLEBLE_UUID_STR_LEN 37  // 36 characters + null terminator
 #define SIMPLEBLE_CHARACTERISTIC_MAX_COUNT 16
@@ -89,3 +73,45 @@ typedef enum {
     SIMPLEBLE_ADDRESS_TYPE_RANDOM = 1,
     SIMPLEBLE_ADDRESS_TYPE_UNSPECIFIED = 2,
 } BlexAddressType;
+
+
+namespace Ui {
+class BLE_Finder;
+}
+
+class BLE_Finder : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit BLE_Finder(QWidget *parent = nullptr);
+    ~BLE_Finder();
+
+    bool isBluetoothEnabled(void);
+
+    bool scanStart(void);
+    bool scanStop(void);
+
+
+signals:
+    void finderRefresh(void);
+    void finderConnect(void);
+
+private slots:
+    void on_pushButton_connect_clicked();
+
+    void on_pushButton_refresh_clicked();
+
+private:
+    Ui::BLE_Finder *ui;
+
+    BlexAdapter adapter;
+
+    void addDevicesToList(QString identifier, QString address);
+    void clearDevicesList(void);
+};
+
+void callbackOnScanStart(BlexAdapter adapter, void* userdata);
+void callbackOnScanFound(BlexAdapter adapter, BlexPeripheral peripheral, void* userdata);
+
+#endif // BLE_FINDER_H

@@ -57,8 +57,8 @@ MainWindow::MainWindow(QWidget *parent)
     // init Plot object
     plot = new Plot;
 
-    ble_imp = new BLE_IMP;
-    ble_imp->isBluetoothEnabled();
+    ble_finder = new BLE_Finder;
+    ble_finder->isBluetoothEnabled();
 
     // set plot to graphicsView on panel
     ui->graphicsView->setChart(plot);
@@ -394,8 +394,11 @@ void MainWindow::on_pushButton_setPlotCh_clicked()
 
 void MainWindow::ActionDebug_triggered()
 {
-    debugWindow = new DebugWindow;
-    debugWindow->setWindowTitle(QString("Debug"));
+    if (debugWindow == NULL)
+    {
+        debugWindow = new DebugWindow;
+        debugWindow->setWindowTitle(QString("Debug"));
+    }
 
     //    connect(debugWindow->, SIGNAL(triggered()), this, SLOT(on_ActionDebug_triggered()));
     debugWindow->show();
@@ -427,4 +430,10 @@ void MainWindow::Delay_MSec(int msec)
     QEventLoop loop;//定义一个新的事件循环
     QTimer::singleShot(msec, &loop, SLOT(quit()));//创建单次定时器，槽函数为事件循环的退出函数
     loop.exec();//事件循环开始执行，程序会卡在这里，直到定时时间到，本循环被退出
+}
+
+void MainWindow::on_pushButton_searchBLE_clicked()
+{
+    ble_finder->scanStart();
+    ble_finder->show();
 }
