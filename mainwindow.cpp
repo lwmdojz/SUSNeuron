@@ -24,13 +24,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // UDP init
     m_cmd = new QUdpSocket;
-    m_cmd->bind(sendPort);      // for normal commend, 2333
+    m_cmd->bind(sendPort); // for normal commend, 2333
 
     m_sig = new QUdpSocket;
-    m_sig->bind(shitPort);      // for shit data, 2334
+    m_sig->bind(shitPort); // for shit data, 2334
 
     m_imp = new QUdpSocket;
-    m_imp->bind(recvPort);      // for impedance test, 2335
+    m_imp->bind(recvPort); // for impedance test, 2335
 
     recvType = UdpOther;
 
@@ -40,14 +40,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_imp, &QUdpSocket::readyRead, this, &MainWindow::handleImpedance);
 
     // set default choice of comvo boxes
-    ui->comboBox_UpperCutoff->setCurrentIndex(3);
-    ui->comboBox_LowerCutoff->setCurrentIndex(24);
+    ui->comboBox_upperCutoff->setCurrentIndex(3);
+    ui->comboBox_lowerCutoff->setCurrentIndex(24);
 
     // DSP cutoff frequency calculate
     for (int i = 1; i < 16; i++)
     {
-        ui->comboBox_DSP->setItemText(i,
-            QString::number(ui->spinBox_SamplingRate->value() * kFreq[i-1], 'g', 10) + " Hz");
+        ui->comboBox_DSP->setItemText(i, QString::number(ui->spinBox_samplingRate->value() * kFreq[i - 1], 'g', 10) + " Hz");
     }
     ui->comboBox_DSP->setCurrentIndex(6);
 
@@ -58,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     plot = new Plot;
 
     ble_finder = new BLE_Finder;
-    ble_finder->isBluetoothEnabled();
+    connect(ble_finder, SIGNAL(deviceConnected()), this, SLOT(BLE_DeviceConnected()));
 
     // set plot to graphicsView on panel
     ui->graphicsView->setChart(plot);
@@ -68,28 +67,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::on_pushButton_searchIP_clicked()
-{
-    // To Do: IP Search
-    QString ip_temp = "192.168.137.0";      // IP address in QString
-
-    for (quint16 i = 0; i < 256; i++)
-    {
-        recvType = UdpSearch;
-        ip_temp = "192.168.137." + QString::number(i);
-        QString ParamCmd = "m" + QString::number(ui->spinBox_SamplingRate->value(), 10);
-        m_cmd->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip_temp), sendPort);
-
-        Delay_MSec(10);
-
-        if (connect_status)
-        {
-            break;
-        }
-        
-    }
+    ble_finder->close();
+    debugWindow->close();
 }
 
 /********** Udp handle function  **********/
@@ -109,7 +88,7 @@ void MainWindow::handleCommand()
     if (len > 0)
     {
         // print debug data
-        qDebug() <<  QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
+        qDebug() << QString("[%1:%2] %3").arg(cli_addr.toString()).arg(port).arg(buf);
 
         // read register feedback
         if (recvType == UdpRead)
@@ -120,7 +99,7 @@ void MainWindow::handleCommand()
         // Battery voltage feedback
         else if (recvType == UdpBatt)
         {
-            QString bat = QString::number(((quint8)buf[0]+(((quint16)buf[1])<<8)) * 2) + " mV";
+            QString bat = QString::number(((quint8)buf[0] + (((quint16)buf[1]) << 8)) * 2) + " mV";
             qDebug() << bat;
             ui->label_batt->setText(bat);
         }
@@ -134,8 +113,7 @@ void MainWindow::handleCommand()
         }
         recvType = UdpOther;
 
-        ui->statusbar->showMessage(tr("Responsed!"), 1500);
-    }
+     }
 }
 
 /**
@@ -152,7 +130,7 @@ void MainWindow::handleImpedance()
 
     qDebug() << "Impedance test" << len;
 
-    if (len > 0)    // get feedback
+    if (len > 0) // get feedback
     {
         if (ImpedanceFileName != "")
         {
@@ -187,7 +165,7 @@ void MainWindow::handleElecSig()
     char buf[2084] = {0};
     qint32 len = m_sig->readDatagram(buf, sizeof(buf), &cli_addr, &port);
 
-    if (len > 0)            // get feedback
+    if (len > 0) // get feedback
     {
         if (ShitFileName != "")
         {
@@ -205,7 +183,7 @@ void MainWindow::handleElecSig()
                     temp[i] = ((quint16)((quint8)buf[2 * i + 1]) << 8) + (quint8)buf[2 * i];
                     out << temp[i] << ",";
 
-                    if (i%32==0 && i!=0)
+                    if (i % 32 == 0 && i != 0)
                     {
                         out << "\n";
                     }
@@ -213,7 +191,7 @@ void MainWindow::handleElecSig()
 
                 if (plot->getPlot_status() == true)
                 {
-                    plot->Plotting(temp, len/2);
+                    plot->Plotting(temp, len / 2);
                 }
                 file.close();
             }
@@ -221,14 +199,32 @@ void MainWindow::handleElecSig()
     }
 }
 
+void MainWindow::on_pushButton_searchIP_clicked()
+{
+    // To Do: IP Search
+    QString ip_temp = "192.168.137.0"; // IP address in QString
 
-//void MainWindow::BLE
+    for (quint16 i = 0; i < 256; i++)
+    {
+        recvType = UdpSearch;
+        ip_temp = "192.168.137." + QString::number(i);
+        QString ParamCmd = "m" + QString::number(ui->spinBox_samplingRate->value(), 10);
+        m_cmd->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip_temp), sendPort);
+
+        Delay_MSec(10);
+
+        if (connect_status)
+        {
+            break;
+        }
+    }
+}
 
 /********** Acquisition parameter setting **********/
 
-void MainWindow::on_pushButton_SetParam_clicked()
+void MainWindow::on_pushButton_setParam_clicked()
 {
-    QString ParamCmd = "m" + QString::number(ui->spinBox_SamplingRate->value(), 10);
+    QString ParamCmd = "m" + QString::number(ui->spinBox_samplingRate->value(), 10);
     m_cmd->writeDatagram(ParamCmd.toUtf8(), QHostAddress(ip), sendPort);
 
     ParamCmd = "u" + QString::number(ui->comboBox_DSP->currentIndex(), 10);
@@ -245,9 +241,8 @@ void MainWindow::on_pushButton_SetParam_clicked()
     }
     m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 
-    ParamCmd = "f" + QString::number(ui->comboBox_UpperCutoff->currentIndex()) + " " + QString::number(ui->comboBox_LowerCutoff->currentIndex());
+    ParamCmd = "f" + QString::number(ui->comboBox_upperCutoff->currentIndex()) + " " + QString::number(ui->comboBox_lowerCutoff->currentIndex());
 }
-
 
 void MainWindow::on_checkBox_DSPOnoff_stateChanged(int arg1)
 {
@@ -263,39 +258,46 @@ void MainWindow::on_checkBox_DSPOnoff_stateChanged(int arg1)
     }
 }
 
+void MainWindow::on_spinBox_samplingRate_valueChanged(int sampleRate)
+{
+    for (int i = 1; i < 16; i++)
+    {
+        ui->comboBox_DSP->setItemText(i, QString::number(sampleRate * kFreq[i - 1], 'g', 10) + " Hz");
+    }
+}
+
 void MainWindow::on_pushButton_calibrate_clicked()
 {
     QString str = "a";
     m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
-void MainWindow::on_pushButton_clear_clicked()
+void MainWindow::on_pushButton_clearCal_clicked()
 {
     QString str = "c";
     m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
 }
 
-/********** Register setting **********/
+// /********** Register setting **********/
 
-void MainWindow::on_pushButton_read_clicked()
-{
-    recvType = UdpRead;
-//    QString str = "r" + QString::number(ui->spinBox_ReadAddr->value(), 10);
-//    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-}
+// void MainWindow::on_pushButton_read_clicked()
+// {
+//     recvType = UdpRead;
+// //    QString str = "r" + QString::number(ui->spinBox_ReadAddr->value(), 10);
+// //    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+// }
 
-void MainWindow::on_pushButton_write_clicked()
-{
-    recvType = UdpRead;
-//    QString str = "w" + QString::number(ui->spinBox_writeAddr->value(), 10) + QString::number(ui->spinBox_writeData->value(), 10);
-//    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-}
-
+// void MainWindow::on_pushButton_write_clicked()
+// {
+//     recvType = UdpRead;
+// //    QString str = "w" + QString::number(ui->spinBox_writeAddr->value(), 10) + QString::number(ui->spinBox_writeData->value(), 10);
+// //    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
+// }
 
 /********** Device & Battery **********/
 /**
  * @brief handle press run/stop
- * 
+ *
  */
 void MainWindow::on_pushButton_run_clicked()
 {
@@ -344,66 +346,6 @@ void MainWindow::on_pushButton_shutdown_clicked()
     ui->label_status->setText("设备状态：未连接");
 }
 
-/********** Impedance measurement setting **********/
-
-//void MainWindow::on_pushButton_channelset_clicked()
-//{
-////    QString str = "h" + QString::number(ui->spinBox_ch->value(), 10);-
-//    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-//}
-
-//void MainWindow::on_pushButton_currentset_clicked()
-//{
-////    QString str = "i" + QString::number(ui->comboBox_->currentIndex(), 10);
-////    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-//}
-
-void MainWindow::on_pushButton_impedancetest_clicked()
-{
-    ImpedanceFileName = QFileDialog::getSaveFileName(this, tr("Save file (if file existed, delete and rebuild it"), "", tr("(*.csv)"));
-    QFileInfo fileInfo(ImpedanceFileName);
-    if (fileInfo.isFile())
-    {
-        fileInfo.dir().remove(fileInfo.fileName());
-    }
-    QString str = "z";
-    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-}
-
-//void MainWindow::on_pushButton_hz_clicked()
-//{
-
-////    double a = ui->doubleSpinBox_hz->value();
-//    int b = a * 10;
-//    QString str = "g" + QString::number(b, 10);
-//    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-//}
-
-//void MainWindow::on_pushButton_zcount_clicked()
-//{
-////    QString str = "j" + QString::number(ui->spinBox_zcount->value(), 10);
-//    m_cmd->writeDatagram(str.toUtf8(), QHostAddress(ip), sendPort);
-//}
-
-void MainWindow::on_pushButton_setPlotCh_clicked()
-{
-    plot->setPlotChannel(ui->comboBox_plotChannel->currentIndex());
-}
-
-
-
-void MainWindow::ActionDebug_triggered()
-{
-    if (debugWindow == NULL)
-    {
-        debugWindow = new DebugWindow;
-        debugWindow->setWindowTitle(QString("Debug"));
-    }
-
-    //    connect(debugWindow->, SIGNAL(triggered()), this, SLOT(on_ActionDebug_triggered()));
-    debugWindow->show();
-}
-
 void MainWindow::on_checkBox_plot_stateChanged(int arg1)
 {
     if (ui->checkBox_plot->isChecked())
@@ -416,24 +358,106 @@ void MainWindow::on_checkBox_plot_stateChanged(int arg1)
     }
 }
 
-
-void MainWindow::on_spinBox_SamplingRate_valueChanged(int sampleRate)
-{
-    for (int i = 1; i < 16; i++)
-    {
-        ui->comboBox_DSP->setItemText(i, QString::number(sampleRate*kFreq[i-1], 'g', 10) + " Hz");
-    }
-}
-
-void MainWindow::Delay_MSec(int msec)
-{
-    QEventLoop loop;//定义一个新的事件循环
-    QTimer::singleShot(msec, &loop, SLOT(quit()));//创建单次定时器，槽函数为事件循环的退出函数
-    loop.exec();//事件循环开始执行，程序会卡在这里，直到定时时间到，本循环被退出
-}
+/********** BLE & Impedance **********/
 
 void MainWindow::on_pushButton_searchBLE_clicked()
 {
-    ble_finder->scanStart();
-    ble_finder->show();
+    if (ui->pushButton_searchBLE->text() == QString("搜索蓝牙设备"))
+    {
+        ble_finder->show();
+        ble_finder->scanDevice();
+    }
+    else
+    {
+        ble_finder->disconnectDevice();
+        ui->label_bleState->setText(QString("状态：未连接"));
+        ui->pushButton_searchBLE->setText(QString("搜索蓝牙设备"));
+    }
 }
+
+void MainWindow::on_pushButton_startIMP_clicked()
+{
+    ble_finder->sendCommand(StringToByteArray("ST"));
+}
+
+void MainWindow::on_pushButton_applyPara_clicked()
+{
+    ble_finder->sendCommand(CmdFloatToByteArray("BF", ui->doubleSpinBox_startFreq->value()));
+    ble_finder->sendCommand(CmdFloatToByteArray("EF", ui->doubleSpinBox_stopFreq->value()));
+    ble_finder->sendCommand(CmdFloatToByteArray("EA", ui->doubleSpinBox_amplitude->value()));
+}
+
+void MainWindow::on_pushButton_channelSet_clicked()
+{
+
+}
+
+void MainWindow::on_pushButton_switchMode_clicked()
+{
+    if (ui->pushButton_switchMode->text() == QString("阻抗测量模式"))
+    {
+        if (ble_finder->isBluetoothConnected())
+        {
+            ble_finder->sendCommand(StringToByteArray("SM2"));
+        }
+
+        ui->pushButton_switchMode->setText(QString("波形发生模式"));
+        ui->label_startFreq->setText("激励频率");
+        ui->label_stopFreq->setEnabled(false);
+        ui->doubleSpinBox_stopFreq->setEnabled(false);
+    }
+    else
+    {
+        ble_finder->sendCommand(StringToByteArray("SM1"));
+
+        ui->pushButton_switchMode->setText(QString("阻抗测量模式"));
+        ui->label_startFreq->setText("开始频率");
+        ui->label_stopFreq->setEnabled(true);
+        ui->doubleSpinBox_stopFreq->setEnabled(true);
+    }
+}
+
+
+void MainWindow::ActionDebug_triggered() {
+
+    if (debugWindow == NULL)
+    {
+        debugWindow = new DebugWindow;
+        debugWindow->setWindowTitle(QString("Debug"));
+    }
+
+    //    connect(debugWindow->, SIGNAL(triggered()), this, SLOT(on_ActionDebug_triggered()));
+    debugWindow->show();
+}
+
+void MainWindow::BLE_DeviceConnected()
+{
+    ui->label_bleState->setText(QString("状态：已连接"));
+    ui->pushButton_searchBLE->setText(QString("断开蓝牙连接"));
+}
+
+void MainWindow::on_pushButton_setPlotCh_clicked()
+{
+    plot->setPlotChannel(ui->comboBox_plotChannel->currentIndex());
+}
+
+uint8_t* MainWindow::StringToByteArray(QString string)
+{
+    QByteArray byteArray = string.toUtf8();
+    uint8_t* data = (uint8_t*)malloc(byteArray.size());
+    memcpy(data, byteArray.data(), byteArray.size());
+    return data;
+}
+
+uint8_t* MainWindow::CmdFloatToByteArray(QString string, float value)
+{
+    QByteArray byteArray = string.toUtf8();
+    uint8_t* Data = (uint8_t*)malloc(byteArray.size() + sizeof(float));
+
+    memcpy(Data, byteArray.data(), byteArray.size());
+    memcpy(Data + byteArray.size(), &value, sizeof(float));
+    
+    return Data;
+}
+
+

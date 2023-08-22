@@ -4,7 +4,7 @@
 #include <QLibrary>
 #include <QWidget>
 #include <QTCore>
-#include "ble_finder.h"
+#include <QTimer>
 
 #define SIMPLEBLE_UUID_STR_LEN 37  // 36 characters + null terminator
 #define SIMPLEBLE_CHARACTERISTIC_MAX_COUNT 16
@@ -88,30 +88,45 @@ public:
     ~BLE_Finder();
 
     bool isBluetoothEnabled(void);
+    bool isBluetoothConnected(void);
 
-    bool scanStart(void);
-    bool scanStop(void);
+    void scanDevice(void);
+    void connectDevice(void);
+    void disconnectDevice(void);
 
+    void getService(BlexPeripheral peripheral, QString uuid);
 
-signals:
-    void finderRefresh(void);
-    void finderConnect(void);
+//    bool sendCommand(char *data, size_t length);
+    bool sendCommand(uint8_t* command);
+
 
 private slots:
     void on_pushButton_connect_clicked();
 
     void on_pushButton_refresh_clicked();
 
+signals:
+    void deviceConnected(void);
+    void deviceDisconnected(void);
+
 private:
     Ui::BLE_Finder *ui;
 
-    BlexAdapter adapter;
+    BlexAdapter     adapter;
+    BlexPeripheral  peripheral;
+    BlexService*    service;
 
-    void addDevicesToList(QString identifier, QString address);
-    void clearDevicesList(void);
+    uint8_t         data;
+
 };
+
+void Delay_MSec(int msec);
 
 void callbackOnScanStart(BlexAdapter adapter, void* userdata);
 void callbackOnScanFound(BlexAdapter adapter, BlexPeripheral peripheral, void* userdata);
+
+void callbackOnIndicate(const char* serivce, const char* characteristic, const char* data, size_t data_length);
+
+
 
 #endif // BLE_FINDER_H

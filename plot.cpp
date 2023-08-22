@@ -21,7 +21,7 @@ Plot::Plot(QGraphicsItem *parent, Qt::WindowFlags wFlags) : QChart(QChart::Chart
 
     plot_series = new QLineSeries(this);
     plot_series->setPen(green);
-//    plot_series->useOpenGL();
+    plot_series->useOpenGL();
 
     plot_axisX->setRange(0, x_range);  // fix range
     plot_axisX->setTickCount(5);
