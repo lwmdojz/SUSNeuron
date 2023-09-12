@@ -53,7 +53,6 @@ private slots:
     void on_pushButton_searchBLE_clicked();
     void on_pushButton_channelSet_clicked();
     void on_pushButton_switchMode_clicked();
-    void on_pushButton_applyPara_clicked();
     void on_pushButton_startIMP_clicked();
 
     // Plot Setting
@@ -81,9 +80,13 @@ private:
     QString ImpedanceFileName = "testIMP.csv";
     QString ShitFileName = "testElec.csv";
 
-    Plot *plot;
+    Plot *elecplot;
+
+    Plot *impplot;
     BLE_Finder *ble_finder;
     DebugWindow *debugWindow;
+
+    bool IMP_Status = true;
 
     double kFreq[15] = {0.1103, 0.04579, 0.02125, 0.01027,
                         0.005053, 0.002506, 0.001248, 0.0006229,
@@ -94,8 +97,10 @@ private:
     void on_pushButton_read_clicked();
     void on_pushButton_write_clicked();
 
-    uint8_t* StringToByteArray(QString string);
-    uint8_t* CmdFloatToByteArray(QString string, float value);
+    uint8_t* ConvertToByteArray(QString string);
+    uint8_t* ConvertToByteArray(QString string, float value);
+    uint8_t* ConvertToByteArray(QString string, int value);
+
     
 };
 #endif // MAINWINDOW_H

@@ -10,7 +10,10 @@
 #define SIMPLEBLE_CHARACTERISTIC_MAX_COUNT 16
 #define SIMPLEBLE_DESCRIPTOR_MAX_COUNT 16
 
-// TODO: Add proper error codes.
+#define BLEUART_SERVICE_UUID "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+#define BLEUART_RX_CHARACTERISTIC_UUID "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+#define BLEUART_TX_CHARACTERISTIC_UUID "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
+
 typedef enum {
     SIMPLEBLE_SUCCESS = 0,
     SIMPLEBLE_FAILURE = 1,
@@ -96,9 +99,9 @@ public:
 
     void getService(BlexPeripheral peripheral, QString uuid);
 
-//    bool sendCommand(char *data, size_t length);
     bool sendCommand(uint8_t* command);
 
+    void setFreqCount(quint16 newFreqCount);
 
 private slots:
     void on_pushButton_connect_clicked();
@@ -108,6 +111,7 @@ private slots:
 signals:
     void deviceConnected(void);
     void deviceDisconnected(void);
+    void dataReceived(float* freqency, float* amplitude, float* phase, quint16 freqCount);
 
 private:
     Ui::BLE_Finder *ui;
@@ -118,15 +122,13 @@ private:
 
     uint8_t         data;
 
+    quint16         freqCount;
 };
-
-void Delay_MSec(int msec);
 
 void callbackOnScanStart(BlexAdapter adapter, void* userdata);
 void callbackOnScanFound(BlexAdapter adapter, BlexPeripheral peripheral, void* userdata);
-
 void callbackOnIndicate(const char* serivce, const char* characteristic, const char* data, size_t data_length);
 
-
+void Delay_MSec(int msec);
 
 #endif // BLE_FINDER_H

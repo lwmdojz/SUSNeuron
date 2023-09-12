@@ -53,6 +53,19 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_17">
            <item>
+            <widget class="QLabel" name="label_bleState">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>状态：未连接</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="pushButton_searchBLE">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
@@ -66,15 +79,25 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_bleState">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+            <widget class="QLabel" name="label_amplitude">
              <property name="text">
-              <string>状态：未连接</string>
+              <string>激励幅值 (mV)：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_amplitude">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="maximum">
+              <double>800.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>600.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -85,29 +108,47 @@
            <item>
             <widget class="QLabel" name="label_startFreq">
              <property name="text">
-              <string>开始频率：</string>
+              <string>开始频率 (Hz)：</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="doubleSpinBox_startFreq">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="maximum">
               <double>10000.000000000000000</double>
              </property>
              <property name="value">
-              <double>0.100000000000000</double>
+              <double>1000.000000000000000</double>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="label_stopFreq">
              <property name="text">
-              <string>结束频率：</string>
+              <string>结束频率 (Hz)：</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="doubleSpinBox_stopFreq">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="maximum">
               <double>10000000.000000000000000</double>
              </property>
@@ -121,27 +162,68 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_18">
            <item>
-            <widget class="QLabel" name="label_amplitude">
+            <widget class="QLabel" name="label_sweepPts">
              <property name="text">
-              <string>激励幅值：</string>
+              <string>扫频点数：</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_amplitude">
-             <property name="maximum">
-              <double>800.000000000000000</double>
+            <widget class="QSpinBox" name="spinBox_sweepPts">
+             <property name="enabled">
+              <bool>true</bool>
              </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
+             <property name="minimum">
+              <number>1</number>
              </property>
              <property name="value">
-              <double>600.000000000000000</double>
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_dataRate">
+             <property name="text">
+              <string>扫频速率 (Hz):</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinBox_dataRate">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="value">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_19">
+           <item>
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>当前模式：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_switchMode">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>阻抗测量模式</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QComboBox" name="comboBox_IMPChannel">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <item>
               <property name="text">
                <string>通道 1</string>
@@ -155,32 +237,10 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_applyPara">
-             <property name="text">
-              <string>应用参数</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_19">
-           <item>
-            <widget class="QPushButton" name="pushButton_switchMode">
-             <property name="text">
-              <string>阻抗测量模式</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton">
-             <property name="text">
-              <string>高级设置</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QPushButton" name="pushButton_startIMP">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
              <property name="text">
               <string>开始测试</string>
              </property>

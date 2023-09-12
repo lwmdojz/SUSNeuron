@@ -1,6 +1,5 @@
 QT      += core gui
 QT      += charts
-QT      += bluetooth
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QT      += network printsupport
@@ -31,8 +30,6 @@ FORMS += \
     debugwindow.ui \
     mainwindow.ui
 
-TRANSLATIONS += \
-    SUSNeuron_zh_CN.ts
 CONFIG += lrelease
 CONFIG += embed_translations
 

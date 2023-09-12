@@ -1,8 +1,14 @@
 #include "ble_finder.h"
 #include "ui_ble_finder.h"
 
-static QLibrary* libblex = new QLibrary("libblex.dll");
-static QList<BlexPeripheral> searchedPeripherals;
+QLibrary* libblex = new QLibrary("libblex.dll");
+QList<BlexPeripheral> searchedPeripherals;
+
+float frequency[1024];
+float amplitude[1024];
+float phase[1024];
+quint16 receiveCount = 0;
+
 
 BLE_Finder::BLE_Finder(QWidget *parent) :
     QWidget(parent),
@@ -15,30 +21,28 @@ BLE_Finder::BLE_Finder(QWidget *parent) :
     else
         qDebug() << "dll load failed";
 
-    /* get Ble Adapter Handle */    {
-        typedef BlexAdapter (*FunDef)(size_t);
-        FunDef blexAdapterGetHandle = (FunDef)libblex->resolve("blexAdapterGetHandle");
-        adapter = blexAdapterGetHandle(0);
+   /* get Ble Adapter Handle */    {
+       typedef BlexAdapter (*FunDef)(size_t);
+       FunDef blexAdapterGetHandle = (FunDef)libblex->resolve("blexAdapterGetHandle");
+       adapter = blexAdapterGetHandle(0);
     }
 
-    service = new BlexService;
+   service = new BlexService;
 
-    /* Register Scan Functions */   {
-        typedef void (*callback)(BlexAdapter adapter, void* userdata);
-        typedef BlexErrorCode (*SetCbFunc)(BlexAdapter, callback, void*);
-        SetCbFunc SetCallbackOnScanStart = (SetCbFunc)libblex->resolve("blexAdapterSetCallbackOnScanStart");
-        SetCbFunc blexAdapterSetCallbackOnScanStop = (SetCbFunc)libblex->resolve("blexAdapterSetCallbackOnScanStop");
-        SetCallbackOnScanStart(adapter, callbackOnScanStart, nullptr);
-        blexAdapterSetCallbackOnScanStop(adapter, callbackOnScanStart, nullptr);
+   /* Register Scan Functions */   {
+       typedef void (*callback)(BlexAdapter adapter, void* userdata);
+       typedef BlexErrorCode (*SetCbFunc)(BlexAdapter, callback, void*);
+       SetCbFunc SetCallbackOnScanStart = (SetCbFunc)libblex->resolve("blexAdapterSetCallbackOnScanStart");
+       SetCbFunc blexAdapterSetCallbackOnScanStop = (SetCbFunc)libblex->resolve("blexAdapterSetCallbackOnScanStop");
+       SetCallbackOnScanStart(adapter, callbackOnScanStart, nullptr);
+       blexAdapterSetCallbackOnScanStop(adapter, callbackOnScanStart, nullptr);
 
-        // Register Scan Found Callback
-        typedef void (*callback2)(BlexAdapter adapter, BlexPeripheral peripheral, void* userdata);
-        typedef BlexErrorCode (*SetCbFunc2)(BlexAdapter, callback2, void*);
-        SetCbFunc2 SetCallbackOnScanFound = (SetCbFunc2)libblex->resolve("blexAdapterSetCallbackOnScanFound");
-        SetCallbackOnScanFound(adapter, callbackOnScanFound, nullptr);
+       // Register Scan Found Callback
+       typedef void (*callback2)(BlexAdapter adapter, BlexPeripheral peripheral, void* userdata);
+       typedef BlexErrorCode (*SetCbFunc2)(BlexAdapter, callback2, void*);
+       SetCbFunc2 SetCallbackOnScanFound = (SetCbFunc2)libblex->resolve("blexAdapterSetCallbackOnScanFound");
+       SetCallbackOnScanFound(adapter, callbackOnScanFound, nullptr);
     }
-
-    // deviceScan();
 }
 
 BLE_Finder::~BLE_Finder()
@@ -106,19 +110,17 @@ void BLE_Finder::getService(BlexPeripheral blexPeripheral, QString uuid)
 
     BlexService* blexService = new BlexService;
 
-    qDebug() << blexPeripheralGetServicesCount(blexPeripheral);
+    qDebug() << "Services count:" <<blexPeripheralGetServicesCount(blexPeripheral);
 
     for (int i = 0; i < blexPeripheralGetServicesCount(blexPeripheral); i++) {
         blexPeripheralGetServices(blexPeripheral, i, blexService);
         if (QString(blexService->uuid.value) == uuid)
         {
-            qDebug() << "Service uuid: " << blexService->uuid.value;
             service = blexService;
 
             return;
         }
     }
-    qDebug() << "no such service";
 }
 
 void BLE_Finder::connectDevice(void)
@@ -126,13 +128,26 @@ void BLE_Finder::connectDevice(void)
     typedef BlexErrorCode (*FunDef)(BlexPeripheral);
     FunDef blexPeripheralConnect = (FunDef)libblex->resolve("blexPeripheralConnect");
 
+    typedef void (*callback)(const char* serivce,
+                             const char* characteristic,
+                             const char* data,
+                             size_t data_length);
+    typedef BlexErrorCode (*FuncDef)(BlexPeripheral, char*, char*, callback);
+    FuncDef blexPeripheralNotify = (FuncDef)libblex->resolve("blexPeripheralNotify");
+
     if (!blexPeripheralConnect(searchedPeripherals[ui->listWidget->currentRow()]))
     {
         peripheral = searchedPeripherals[ui->listWidget->currentRow()];
+        getService(peripheral, BLEUART_SERVICE_UUID);
+
         qDebug() << "BLE Connected";
 
-        getService(peripheral, QString("6e400001-b5a3-f393-e0a9-e50e24dcca9e"));
-
+        for (int j = 0; j < service->characteristic_count; ++j) {
+            if (QString(service->characteristics[j].uuid.value) == BLEUART_TX_CHARACTERISTIC_UUID)
+            {
+                qDebug() << "BLE Notify" << blexPeripheralNotify(peripheral, service->uuid.value, service->characteristics[j].uuid.value, callbackOnIndicate);
+            }
+        }
         emit deviceConnected();
         searchedPeripherals.clear();
         close();
@@ -157,31 +172,37 @@ bool BLE_Finder::sendCommand(uint8_t* command)
 {
     if (!isBluetoothConnected()) { return false; }
 
-//    typedef void (*callback)(const char* serivce,
-//                             const char* characteristic,
-//                             const char* data,
-//                             size_t data_length);
-//    typedef BlexErrorCode (*FunDef)(BlexPeripheral, char*, char*, callback);
-//    FunDef blexPeripheralIndicate = (FunDef)libblex->resolve("blexPeripheralIndicate");
-
     typedef BlexErrorCode (*FuncDef)(BlexPeripheral, char*, char*, size_t, uint8_t*);
     FuncDef blexPeripheralWriteCommand = (FuncDef)libblex->resolve("blexPeripheralWriteCommand");
 
     for (int j = 0; j < service->characteristic_count; ++j) {
-        if (QString(service->characteristics[j].uuid.value) == QString("6e400002-b5a3-f393-e0a9-e50e24dcca9e"))
+        if (QString(service->characteristics[j].uuid.value) == BLEUART_RX_CHARACTERISTIC_UUID)
         {
-            qDebug() << service->characteristics[j].uuid.value;
+            if (!blexPeripheralWriteCommand(peripheral,
+                                           service->uuid.value,
+                                           service->characteristics[j].uuid.value,
+                                           (size_t)sizeof(command),
+                                           (uint8_t*)command))
+            {
+                qDebug() << "Data sent successfully";
+            }
+            else
+            {
+                qDebug() << "Data sent failed";
+                return false;
+            }
+        }
+    }
 
-            qDebug() << "BLE Sent status" << blexPeripheralWriteCommand(peripheral, 
-                                                                        service->uuid.value,
-                                                                        service->characteristics[j].uuid.value,
-                                                                        (size_t)sizeof(command),
-                                                                        (uint8_t*)command);
+    if (command[0] == 'S' && command[1] == 'T')
+    {
+        receiveCount = 0;
+
+        while (receiveCount < freqCount) {
+            Delay_MSec(1000);
         }
-        if (QString(service->characteristics[j].uuid.value) == QString("6e400003-b5a3-f393-e0a9-e50e24dcca9e"))
-        {
-//            qDebug() << "BLE Indicated" << blexPeripheralIndicate(peripheral, service->uuid.value, service->characteristics[j].uuid.value, callbackOnIndicate);
-        }
+        qDebug() << "Received: " << receiveCount;
+        emit dataReceived(frequency, amplitude, phase, receiveCount);
     }
 
     return true;
@@ -199,8 +220,12 @@ void BLE_Finder::on_pushButton_refresh_clicked(void)
     scanDevice();
 }
 
+void BLE_Finder::setFreqCount(quint16 newFreqCount)
+{
+    freqCount = newFreqCount;
+}
 
-void callbackOnScanStart(BlexAdapter adapter, void* userdata) {}
+void callbackOnScanStart(BlexAdapter adapter, void* userdata) { (void)adapter; (void)userdata; }
 
 void callbackOnScanFound(BlexAdapter adapter, BlexPeripheral peripheral, void* userdata)
 {
@@ -209,9 +234,11 @@ void callbackOnScanFound(BlexAdapter adapter, BlexPeripheral peripheral, void* u
 
     if (blexPeripheralIdentifier(peripheral)[0] != 0)
     {
-        FunDef blexPeripheralAddress = (FunDef)libblex->resolve("blexPeripheralAddress");
         searchedPeripherals.append(peripheral);
     }
+
+    (void)adapter;
+    (void)userdata;
 }
 
 void callbackOnIndicate(const char* serivce, 
@@ -219,21 +246,24 @@ void callbackOnIndicate(const char* serivce,
                         const char* data, 
                         size_t data_length)
 {
-    if (data[0] == 'S' && data[1] == 'C')
-    {
-        /* code */
-    }
-    else if (data[0] == 'E' && data[1] == 'R')
-    {
-        /* code */
-    }
-    else if (data[0] == 'E' && data[1] == 'D')
-    {
-        /* code */
-    }
-    qDebug() << "responsed!";
-}
+    switch (data_length) {
+    case 12:
+        memcpy(&frequency[receiveCount], data, 4);
+        memcpy(&amplitude[receiveCount], data+4, 4);
+        memcpy(&phase[receiveCount], data+8, 4);
+        qDebug() << "Freq: " << frequency[receiveCount] << "Hz";
+        qDebug() << "Amplitude: " << amplitude[receiveCount] << "Ohm, Phase: " << phase[receiveCount];
 
+        receiveCount++;
+
+        break;
+    default:
+        break;
+    }
+
+    (void)serivce;
+    (void)characteristic;
+}
 
 void Delay_MSec(int msec)   // Non-blocking delay
 {

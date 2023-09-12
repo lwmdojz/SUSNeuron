@@ -53,20 +53,27 @@ MainWindow::MainWindow(QWidget *parent)
     // signal-slot, Debug window
     connect(ui->actionDebug, SIGNAL(triggered()), this, SLOT(ActionDebug_triggered()));
 
-    // init Plot object
-    plot = new Plot;
-
+    // init BLE object
     ble_finder = new BLE_Finder;
     connect(ble_finder, SIGNAL(deviceConnected()), this, SLOT(BLE_DeviceConnected()));
 
-    // set plot to graphicsView on panel
-    ui->graphicsView->setChart(plot);
+    // init Plot object
+    elecplot = new Plot;
+    elecplot->InitPlotElec();
+    ui->graphicsView->setChart(elecplot);
     ui->graphicsView->setRubberBand(QChartView::RectangleRubberBand);
+
+    impplot = new Plot;
+    impplot->InitPlotIMP();
+    ui->graphicsView_IMP->setChart(impplot);
+    ui->graphicsView_IMP->setRubberBand(QChartView::RectangleRubberBand);
+    connect(ble_finder, SIGNAL(dataReceived(float*,float*,float*,quint16)), impplot, SLOT(Plotting_IMP(float*,float*,float*,quint16)));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    close();
     ble_finder->close();
     debugWindow->close();
 }
@@ -189,9 +196,9 @@ void MainWindow::handleElecSig()
                     }
                 }
 
-                if (plot->getPlot_status() == true)
+                if (elecplot->getPlot_status() == true)
                 {
-                    plot->Plotting(temp, len / 2);
+                    elecplot->Plotting(temp, len / 2);
                 }
                 file.close();
             }
@@ -323,13 +330,18 @@ void MainWindow::on_pushButton_run_clicked()
 
 void MainWindow::on_pushButton_savePath_clicked()
 {
-    ShitFileName = QFileDialog::getSaveFileName(this, tr("Save as...(if file existed, program will delete and create a new one)"), "", tr("(*.csv)"));
-    QFileInfo fileInfo(ShitFileName);
-
-    if (fileInfo.isFile())
+//    ShitFileName = QFileDialog::getOpenFileName(this, tr("open image file"), "./", tr("Image files(*.bmp *.jpg *.pbm *.pgm *.png *.ppm *.xbm *.xpm);;All files (*.*)"));
+    ShitFileName = QFileDialog::getSaveFileName(this, tr("选择保存文件目录..."), "", tr("(*.csv)"));
+    if (!ShitFileName.isEmpty())
     {
-        fileInfo.dir().remove(fileInfo.fileName());
+        QFileInfo fileInfo(ShitFileName);
+
+        if (fileInfo.isFile())
+        {
+            fileInfo.dir().remove(fileInfo.fileName());
+        }
     }
+
 }
 
 void MainWindow::on_pushButton_getBatt_clicked()
@@ -350,11 +362,11 @@ void MainWindow::on_checkBox_plot_stateChanged(int arg1)
 {
     if (ui->checkBox_plot->isChecked())
     {
-        plot->setPlot_status(true);
+        elecplot->setPlot_status(true);
     }
     else
     {
-        plot->setPlot_status(false);
+        elecplot->setPlot_status(false);
     }
 }
 
@@ -377,14 +389,22 @@ void MainWindow::on_pushButton_searchBLE_clicked()
 
 void MainWindow::on_pushButton_startIMP_clicked()
 {
-    ble_finder->sendCommand(StringToByteArray("ST"));
-}
+    if (IMP_Status)     // Impedance measurement mode
+    {
+        ble_finder->setFreqCount(ui->spinBox_sweepPts->value());
+        ble_finder->sendCommand(ConvertToByteArray("BF", (float)ui->doubleSpinBox_startFreq->value()));
+        ble_finder->sendCommand(ConvertToByteArray("EF", (float)ui->doubleSpinBox_stopFreq->value()));
+        ble_finder->sendCommand(ConvertToByteArray("EA", (float)ui->doubleSpinBox_amplitude->value()));
+        ble_finder->sendCommand(ConvertToByteArray("PT", (int)ui->spinBox_sweepPts->value()));
+        ble_finder->sendCommand(ConvertToByteArray("DR", (int)ui->spinBox_dataRate->value()));
+    }
+    else                // Waveform generation mode
+    {
+        ble_finder->sendCommand(ConvertToByteArray("BF", (float)ui->doubleSpinBox_startFreq->value()));
+        ble_finder->sendCommand(ConvertToByteArray("EA", (float)ui->doubleSpinBox_amplitude->value()));
+    }
 
-void MainWindow::on_pushButton_applyPara_clicked()
-{
-    ble_finder->sendCommand(CmdFloatToByteArray("BF", ui->doubleSpinBox_startFreq->value()));
-    ble_finder->sendCommand(CmdFloatToByteArray("EF", ui->doubleSpinBox_stopFreq->value()));
-    ble_finder->sendCommand(CmdFloatToByteArray("EA", ui->doubleSpinBox_amplitude->value()));
+    ble_finder->sendCommand(ConvertToByteArray("ST"));  // start process
 }
 
 void MainWindow::on_pushButton_channelSet_clicked()
@@ -394,29 +414,33 @@ void MainWindow::on_pushButton_channelSet_clicked()
 
 void MainWindow::on_pushButton_switchMode_clicked()
 {
-    if (ui->pushButton_switchMode->text() == QString("阻抗测量模式"))
+    if (!IMP_Status)
     {
-        if (ble_finder->isBluetoothConnected())
-        {
-            ble_finder->sendCommand(StringToByteArray("SM2"));
-        }
+        IMP_Status = true;
 
-        ui->pushButton_switchMode->setText(QString("波形发生模式"));
-        ui->label_startFreq->setText("激励频率");
-        ui->label_stopFreq->setEnabled(false);
-        ui->doubleSpinBox_stopFreq->setEnabled(false);
-    }
-    else
-    {
-        ble_finder->sendCommand(StringToByteArray("SM1"));
+        ble_finder->sendCommand(ConvertToByteArray("SM1"));
 
         ui->pushButton_switchMode->setText(QString("阻抗测量模式"));
         ui->label_startFreq->setText("开始频率");
-        ui->label_stopFreq->setEnabled(true);
         ui->doubleSpinBox_stopFreq->setEnabled(true);
+        ui->spinBox_dataRate->setEnabled(true);
+        ui->spinBox_sweepPts->setEnabled(true);
+    }
+    else
+    {
+        IMP_Status = false;
+
+        ble_finder->sendCommand(ConvertToByteArray("SM2"));
+
+        ui->pushButton_switchMode->setText(QString("波形发生模式"));
+        ui->label_startFreq->setText("波形频率");
+        ui->doubleSpinBox_stopFreq->setEnabled(false);
+        ui->spinBox_dataRate->setEnabled(false);
+        ui->spinBox_sweepPts->setEnabled(false);
     }
 }
 
+/********** Others **********/
 
 void MainWindow::ActionDebug_triggered() {
 
@@ -438,10 +462,10 @@ void MainWindow::BLE_DeviceConnected()
 
 void MainWindow::on_pushButton_setPlotCh_clicked()
 {
-    plot->setPlotChannel(ui->comboBox_plotChannel->currentIndex());
+    elecplot->setPlotChannel(ui->comboBox_plotChannel->currentIndex());
 }
 
-uint8_t* MainWindow::StringToByteArray(QString string)
+uint8_t* MainWindow::ConvertToByteArray(QString string)
 {
     QByteArray byteArray = string.toUtf8();
     uint8_t* data = (uint8_t*)malloc(byteArray.size());
@@ -449,14 +473,25 @@ uint8_t* MainWindow::StringToByteArray(QString string)
     return data;
 }
 
-uint8_t* MainWindow::CmdFloatToByteArray(QString string, float value)
+uint8_t* MainWindow::ConvertToByteArray(QString string, int value)
 {
     QByteArray byteArray = string.toUtf8();
-    uint8_t* Data = (uint8_t*)malloc(byteArray.size() + sizeof(float));
+    uint8_t* Data = (uint8_t*)malloc(byteArray.size() + sizeof(value));
 
     memcpy(Data, byteArray.data(), byteArray.size());
-    memcpy(Data + byteArray.size(), &value, sizeof(float));
-    
+    memcpy(Data + byteArray.size(), &value, sizeof(value));
+
+    return Data;
+}
+
+uint8_t* MainWindow::ConvertToByteArray(QString string, float value)
+{
+    QByteArray byteArray = string.toUtf8();
+    uint8_t* Data = (uint8_t*)malloc(byteArray.size() + sizeof(value));
+
+    memcpy(Data, byteArray.data(), byteArray.size());
+    memcpy(Data + byteArray.size(), &value, sizeof(value));
+
     return Data;
 }
 
