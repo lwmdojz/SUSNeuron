@@ -21,9 +21,11 @@ public:
     virtual ~Plot();
 
     void InitPlotElec(void);
-    void InitPlotIMP(void);
-
     void Plotting(quint16* pts, quint16 length);
+    void setPlotChannel(quint16 newChannel);
+    quint16 getPlotChannel();
+
+    void InitPlotIMP(void);
 
     bool getPlot_status() const;
     void setPlot_status(bool newPlot_status);
@@ -32,8 +34,10 @@ public:
     void setTimeStart(quint16 range_start);
     void setTimeEnd(quint16 range_end);
 
-    void setPlotChannel(quint16 newChannel);
-    quint16 getPlotChannel();
+    void resetAxis(void);
+
+    void clear(void);
+
 
     void setPlot_rate(quint32 newPlot_rate);
 
@@ -51,6 +55,8 @@ private:
 
     quint32 x_range = 2000;
     quint16 y_range;
+
+    float imp_max = 0, imp_min = 0;
 
     quint64 plot_time;
     quint32 plot_rate;

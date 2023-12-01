@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1080</width>
-    <height>700</height>
+    <height>720</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -124,7 +124,7 @@
               </sizepolicy>
              </property>
              <property name="maximum">
-              <double>10000.000000000000000</double>
+              <double>100000.000000000000000</double>
              </property>
              <property name="value">
               <double>1000.000000000000000</double>
@@ -184,18 +184,57 @@
            <item>
             <widget class="QLabel" name="label_dataRate">
              <property name="text">
-              <string>扫频速率 (Hz):</string>
+              <string>跨阻放大阻值：</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QSpinBox" name="spinBox_dataRate">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="value">
-              <number>20</number>
-             </property>
+            <widget class="QComboBox" name="comboBox_RTIA">
+             <item>
+              <property name="text">
+               <string>200Ω</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1KΩ</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>5KΩ</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10KΩ</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>20KΩ</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>40KΩ</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>80KΩ</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>160KΩ</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Open</string>
+              </property>
+             </item>
             </widget>
            </item>
           </layout>
@@ -232,6 +271,16 @@
              <item>
               <property name="text">
                <string>通道 2</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>通道 3</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>通道 4</string>
               </property>
              </item>
             </widget>
@@ -299,6 +348,30 @@
              </property>
              <property name="value">
               <number>500</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_calibrate">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
+             <property name="text">
+              <string>输入校准</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_clearCal">
+             <property name="font">
+              <font>
+               <family>微软雅黑</family>
+              </font>
+             </property>
+             <property name="text">
+              <string>清除校准</string>
              </property>
             </widget>
            </item>
@@ -571,7 +644,7 @@
               </font>
              </property>
              <property name="text">
-              <string>高通DSP下限频率：</string>
+              <string>DSP下限频率：</string>
              </property>
             </widget>
            </item>
@@ -672,34 +745,6 @@
              </property>
             </widget>
            </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <widget class="QPushButton" name="pushButton_calibrate">
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-              </font>
-             </property>
-             <property name="text">
-              <string>输入校准</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_clearCal">
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-              </font>
-             </property>
-             <property name="text">
-              <string>清除校准</string>
-             </property>
-            </widget>
-           </item>
            <item>
             <widget class="QPushButton" name="pushButton_setParam">
              <property name="font">
@@ -782,7 +827,7 @@
               </font>
              </property>
              <property name="text">
-              <string>电池电量检测</string>
+              <string>电池电压检测</string>
              </property>
             </widget>
            </item>
@@ -979,24 +1024,19 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_setPlotCh">
-             <property name="font">
-              <font>
-               <family>微软雅黑</family>
-              </font>
-             </property>
-             <property name="text">
-              <string>设置波形显示通道</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QCheckBox" name="checkBox_plot">
              <property name="text">
               <string>实时显示开关</string>
              </property>
              <property name="checked">
               <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_resetAxis">
+             <property name="text">
+              <string>重置显示坐标轴</string>
              </property>
             </widget>
            </item>
@@ -1012,7 +1052,7 @@
               </font>
              </property>
              <property name="text">
-              <string>保存路径</string>
+              <string>设置保存路径</string>
              </property>
             </widget>
            </item>
@@ -1057,7 +1097,6 @@
     <property name="title">
      <string>Windows</string>
     </property>
-    <addaction name="actionImpedance"/>
     <addaction name="actionDebug"/>
    </widget>
    <addaction name="menuWindows"/>

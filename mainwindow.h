@@ -51,34 +51,36 @@ private slots:
 
     // Impedance measurement setting
     void on_pushButton_searchBLE_clicked();
-    void on_pushButton_channelSet_clicked();
     void on_pushButton_switchMode_clicked();
     void on_pushButton_startIMP_clicked();
 
     // Plot Setting
-    void on_pushButton_setPlotCh_clicked();
+    void on_comboBox_plotChannel_currentIndexChanged(int index);
     void on_checkBox_plot_stateChanged(int arg1);
 
     // Others
     void ActionDebug_triggered();
     void BLE_DeviceConnected();
+    void IMP_DataProcess(float* frequency, float* amplitude, float* phase, quint16 freqCount);
+
+    void on_pushButton_resetAxis_clicked();
 
 private:
-    QUdpSocket  *m_imp;
     QUdpSocket  *m_cmd;
     QUdpSocket  *m_sig;
+    QUdpSocket  *m_imp;
 
     QString ip = "192.168.137.24";      // IP address in QString
     bool connect_status = false;
 
-    quint16 sendPort = 2333;
-    quint16 shitPort = 2334;
-    quint16 recvPort = 2335;
+    quint16 cmdPort = 2333;
+    quint16 sigPort = 2334;
+    quint16 impPort = 2335;
 
     UdpRecvType recvType;
 
     QString ImpedanceFileName = "testIMP.csv";
-    QString ShitFileName = "testElec.csv";
+    QString SignalFileName = "testElec.csv";
 
     Plot *elecplot;
 

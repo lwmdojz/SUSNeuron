@@ -111,7 +111,7 @@ private slots:
 signals:
     void deviceConnected(void);
     void deviceDisconnected(void);
-    void dataReceived(float* freqency, float* amplitude, float* phase, quint16 freqCount);
+    void IMPdataReceived(float* freqency, float* amplitude, float* phase, quint16 freqCount);
 
 private:
     Ui::BLE_Finder *ui;

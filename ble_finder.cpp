@@ -197,12 +197,17 @@ bool BLE_Finder::sendCommand(uint8_t* command)
     if (command[0] == 'S' && command[1] == 'T')
     {
         receiveCount = 0;
+        quint16 tempCount = receiveCount;
 
         while (receiveCount < freqCount) {
-            Delay_MSec(1000);
+            Delay_MSec(500);
+            if (tempCount != receiveCount)
+            {
+                qDebug() << "Received: " << receiveCount;
+                emit IMPdataReceived(frequency, amplitude, phase, receiveCount);
+                tempCount = receiveCount;
+            }
         }
-        qDebug() << "Received: " << receiveCount;
-        emit dataReceived(frequency, amplitude, phase, receiveCount);
     }
 
     return true;
